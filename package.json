@@ -12,8 +12,11 @@
   "dependencies": {
     "@mantine/core": "7.5.1",
     "@mantine/hooks": "7.5.1",
+    "firebase": "^10.7.2",
+    "firebaseui": "^6.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-firebaseui": "^6.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.36",
