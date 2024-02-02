@@ -1,0 +1,71 @@
+import { z } from "zod"
+import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, AuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
+import "firebaseui/dist/firebaseui.css"
+import { useAuthState } from "react-firebase-hooks/auth"
+
+import { app } from "./firebase"
+import { Login } from "./Login"
+
+export const LoginFormEntryZ = z.object({ email: z.string().email(), name: z.string(), password: z.string() })
+
+const SIGNIN_SUCCESS_URL = "test"
+const TERMS_CONDITIONS_URL = "test"
+const PRIVACY_POLICY_URL = "test"
+
+export const auth = getAuth(app)
+
+const providers: { [index: string]: AuthProvider } = {
+    github: new GithubAuthProvider().addScope("read:user"),
+    google: new GoogleAuthProvider().addScope("https://www.googleapis.com/auth/userinfo.profile")
+}
+
+export const authProvider = async (providerName: string) => {
+    if (!(providerName in providers)) { throw Error }
+    const user = await signInWithPopup(auth, providers[providerName])
+        .then(res => res.user)
+    console.log(user)
+}
+
+export const authEmailPassword = async (e: z.infer<typeof LoginFormEntryZ>) => {
+    const { email, name, password } = LoginFormEntryZ.parse(e)
+    signInWithEmailAndPassword(auth, email, password)
+        .catch(() => createUserWithEmailAndPassword(auth, email, password))
+}
+
+// export default () => {
+//     useEffect(() => {
+//         const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(auth);
+
+//         ui.start("#firebaseui-auth-container", {
+//             callbacks: {
+//                 signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+//                     console.log("Signed in, authResult:", authResult)
+//                     window.location.assign(redirectUrl)
+//                     return true
+//                 },
+//                 uiShown: () => { document.getElementById("loader")!.style.display = "none" }
+//             },
+//             signInSuccessUrl: SIGNIN_SUCCESS_URL,
+//             signInOptions: [
+//                 {
+//                     provider: firebase.auth.GithubAuthProvider.PROVIDER_ID,
+//                     scopes: ["read:user"]
+//                 },
+//                 {
+//                     provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+//                     requireDisplayName: true,
+//                     disableSignUp: {
+//                         status: true
+//                     }
+//                 }
+//             ],
+//             tosUrl: TERMS_CONDITIONS_URL,
+//             privacyPolicyUrl: () => { window.location.assign(PRIVACY_POLICY_URL) }
+//         });
+//     }, []);
+
+//     return <>
+//         <div id="firebaseui-auth-container"></div>
+//         <div id="loader">Loading...</div>
+//     </>
+// }

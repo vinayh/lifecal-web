@@ -1,7 +1,5 @@
-import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { initializeApp } from "firebase/app"
 
-// Your web app's Firebase configuration
 export const firebaseConfig = {
   apiKey: "AIzaSyA-bK7ElDp76XhjTjkpzApULPLV8ZjQna4",
   authDomain: "lifecal-backend.firebaseapp.com",
@@ -11,6 +9,4 @@ export const firebaseConfig = {
   appId: "1:531017479197:web:cb03ad0e95beaa447a42f4"
 };
 
-// Initialize Firebase
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);

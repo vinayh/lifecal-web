@@ -11,12 +11,17 @@
   },
   "dependencies": {
     "@mantine/core": "7.5.1",
+    "@mantine/form": "^7.5.1",
     "@mantine/hooks": "7.5.1",
+    "@tabler/icons-react": "^2.47.0",
     "firebase": "^10.7.2",
     "firebaseui": "^6.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-firebaseui": "^6.0.0"
+    "react-firebase-hooks": "^5.1.1",
+    "react-firebaseui": "^6.0.0",
+    "react-router-dom": "^6.22.0",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.36",
