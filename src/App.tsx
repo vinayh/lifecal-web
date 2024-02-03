@@ -4,7 +4,7 @@ import { theme } from "./theme";
 // import { Link, useNavigate } from "react-router-dom"
 import { useAuthState } from "react-firebase-hooks/auth"
 
-import { auth } from "./auth"
+import { auth } from "./user"
 import Login from "./Login"
 import { Dashboard } from "./Dashboard"
 

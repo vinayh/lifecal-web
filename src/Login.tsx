@@ -17,7 +17,7 @@ import {
     Stack,
 } from '@mantine/core';
 
-import { authProvider, authEmailPassword } from "./auth"
+import { authProvider, authEmailPassword } from "./user"
 
 export default function Login(props: PaperProps) {
     const [loginOrRegister, toggleLoginOrRegister] = useToggle(['login', 'register']);
