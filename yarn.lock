@@ -1230,6 +1230,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mantine/dates@npm:^7.5.1":
+  version: 7.5.1
+  resolution: "@mantine/dates@npm:7.5.1"
+  dependencies:
+    clsx: "npm:2.0.0"
+  peerDependencies:
+    "@mantine/core": 7.5.1
+    "@mantine/hooks": 7.5.1
+    dayjs: ">=1.0.0"
+    react: ^18.2.0
+    react-dom: ^18.2.0
+  checksum: 8bf355e876ba1d02977ae8ae8b44c82ef3f2014573e8b2c620814f178f5f50f56cd99f933d1fb5eea2343db352f4860f430947dc12e64fc2d9477feb8b9a0ed3
+  languageName: node
+  linkType: hard
+
 "@mantine/form@npm:^7.5.1":
   version: 7.5.1
   resolution: "@mantine/form@npm:7.5.1"
@@ -2070,6 +2085,13 @@ __metadata:
   version: 3.1.2
   resolution: "csstype@npm:3.1.2"
   checksum: 32c038af259897c807ac738d9eab16b3d86747c72b09d5c740978e06f067f9b7b1737e1b75e407c7ab1fe1543dc95f20e202b4786aeb1b8d3bdf5d5ce655e6c6
+  languageName: node
+  linkType: hard
+
+"dayjs@npm:^1.11.10":
+  version: 1.11.10
+  resolution: "dayjs@npm:1.11.10"
+  checksum: 4de9af50639d47df87f2e15fa36bb07e0f9ed1e9c52c6caa1482788ee9a384d668f1dbd00c54f82aaab163db07d61d2899384b8254da3a9184fc6deca080e2fe
   languageName: node
   linkType: hard
 
@@ -4239,6 +4261,7 @@ __metadata:
   resolution: "vite-min-template@workspace:."
   dependencies:
     "@mantine/core": "npm:7.5.1"
+    "@mantine/dates": "npm:^7.5.1"
     "@mantine/form": "npm:^7.5.1"
     "@mantine/hooks": "npm:7.5.1"
     "@tabler/icons-react": "npm:^2.47.0"
@@ -4247,6 +4270,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^6.9.1"
     "@typescript-eslint/parser": "npm:^6.9.1"
     "@vitejs/plugin-react": "npm:^4.2.1"
+    dayjs: "npm:^1.11.10"
     eslint: "npm:^8.53.0"
     eslint-plugin-react-hooks: "npm:^4.6.0"
     eslint-plugin-react-refresh: "npm:^0.4.4"
