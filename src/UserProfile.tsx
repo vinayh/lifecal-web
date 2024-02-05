@@ -1,40 +1,29 @@
-import { useState } from "react";
+import { SetStateAction, useState, Dispatch } from "react";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { TextInput, Button, Group, Text, Paper, Center, Container } from "@mantine/core";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, User, Status } from "./user";
-import { StatusNotification } from "./StatusNotification";
+import { auth, User, Status, ProfileFormEntry, updateUserProfile, fetchUser } from "./user";
 import { BACKEND_URL } from "./Dashboard";
 
-export function UserProfile({ user }: { user: User }) {
+export function UserProfile({ user }: { user: User | null }) {
+    const [errorMessage, setErrorMessage] = useState<string | undefined>()
     const [updateStatus, setUpdateStatus] = useState<Status | null>(null);
     const [updateMessage, setUpdateMessage] = useState<string | null>(null);
-    const [authUser, authLoading, authError] = useAuthState(auth);
 
     const { uid, name, birth, expYears, email } = user
 
-    const updateProfile = (formEntry: { name: string, birth: string | Date, expYears: string | number, email: string }) => {
-        setUpdateStatus(Status.Loading);
-        setUpdateMessage("Saving profile...");
-        const { name, birth, expYears, email } = formEntry;
-        console.log(new Date(birth));
-        if (!(authUser == null)) {
-            authUser.getIdToken()
-                .then((idToken: string) => fetch(`${BACKEND_URL}/updateUserProfile?uid=${uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}&email=${email}`))
+    const onSubmitProfileUpdate = (formEntry: ProfileFormEntry) => {
+        setUpdateStatus(Status.Loading)
+        setUpdateMessage("Saving profile...")
+        if (authUser !== null && authUser !== undefined) {
+            updateUserProfile(authUser, formEntry)
                 .then(res => {
-                    if (res.ok) {
-                        setUpdateStatus(Status.Success);
-                        setUpdateMessage("Profile updated.");
-                    }
-                    else {
-                        setUpdateStatus(Status.Error);
-                        setUpdateMessage("Please try again.");
-                    }
+                    setUpdateStatus(res.status)
+                    setUpdateMessage(res.message)
                 })
         }
     }
-    
+
     const form = useForm({
         initialValues: {
             email: !(email == null) ? email : "",
@@ -57,7 +46,7 @@ export function UserProfile({ user }: { user: User }) {
                 <Text size="lg" fw={500}>
                     Update profile
                 </Text>
-                <form onSubmit={form.onSubmit(updateProfile)}>
+                <form onSubmit={form.onSubmit(onSubmitProfileUpdate)}>
                     <TextInput
                         withAsterisk
                         label="Email"
@@ -81,10 +70,7 @@ export function UserProfile({ user }: { user: User }) {
                         placeholder="80"
                         {...form.getInputProps("expYears")} />
 
-                    <Group preventGrowOverflow={false} wrap="nowrap" mt="md">
-                        <Container w={290} p={0} h={55}>
-                            <StatusNotification status={updateStatus} message={updateMessage} />
-                        </Container>
+                    <Group justify="flex-end" mt="md">
                         <Button type="submit" radius="md" w={110}>Submit</Button>
                     </Group>
                 </form>

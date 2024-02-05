@@ -1,6 +1,6 @@
 import { z } from "zod"
+import { useState } from "react"
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react'
-import { useToggle, upperFirst } from '@mantine/hooks'
 import { useForm } from '@mantine/form'
 import {
     TextInput,
@@ -10,6 +10,8 @@ import {
     Group,
     PaperProps,
     Button,
+    Box,
+    LoadingOverlay,
     ButtonProps,
     Divider,
     Center,
@@ -20,7 +22,7 @@ import {
 import { authProvider, authEmailPassword } from "./user"
 
 export default function Login(props: PaperProps) {
-    // const [loginOrRegister, toggleLoginOrRegister] = useToggle(['login', 'register']);
+    const [loggingIn, setLoggingIn] = useState(false)
 
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
@@ -35,42 +37,45 @@ export default function Login(props: PaperProps) {
 
     return (
         <Center pt={25}>
-            <Paper radius="md" p="xl" shadow="lg" {...props}>
-                <Text size="lg" fw={500}>
-                    Welcome to LifeCal, login or register with
-                </Text>
+            <Box>
+                <Paper radius="md" p="xl" shadow="lg" {...props}>
+                    <Text size="lg" fw={500}>
+                        Welcome to LifeCal, login or register with
+                    </Text>
 
-                <Group grow mb="md" mt="md">
-                    <GoogleButton radius="md" onClick={() => authProvider("google")}>Google</GoogleButton>
-                    <GithubButton radius="md" onClick={() => authProvider("github")}>GitHub</GithubButton>
-                </Group>
-
-                <Divider label="Or continue with email" labelPosition="center" my="lg" />
-
-                <form onSubmit={form.onSubmit(authEmailPassword)}>
-                    <Stack>
-                        <TextInput
-                            required
-                            label="Email"
-                            placeholder="your@email.com"
-                            radius="md"
-                            {...form.getInputProps("email")}
-                        />
-
-                        <PasswordInput
-                            required
-                            label="Password"
-                            placeholder="Your password"
-                            radius="md"
-                            {...form.getInputProps("password")}
-                        />
-                    </Stack>
-
-                    <Group justify="flex-end" mt="md">
-                        <Button type="submit" radius="md">Login | Register</Button>
+                    <Group grow mb="md" mt="md">
+                        <GoogleButton radius="md" onClick={() => authProvider("google")}>Google</GoogleButton>
+                        <GithubButton radius="md" onClick={() => authProvider("github")}>GitHub</GithubButton>
                     </Group>
-                </form>
-            </Paper>
+
+                    <Divider label="Or continue with email" labelPosition="center" my="lg" />
+
+                    <form onSubmit={form.onSubmit((values) => authEmailPassword(values, setLoggingIn))}>
+                        <Stack>
+                            <TextInput
+                                required
+                                label="Email"
+                                placeholder="your@email.com"
+                                radius="md"
+                                {...form.getInputProps("email")}
+                            />
+
+                            <PasswordInput
+                                required
+                                label="Password"
+                                placeholder="Your password"
+                                radius="md"
+                                {...form.getInputProps("password")}
+                            />
+                        </Stack>
+
+                        <Group justify="flex-end" mt="md">
+                            <LoadingOverlay visible={loggingIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+                            <Button type="submit" radius="md">Login | Register</Button>
+                        </Group>
+                    </form>
+                </Paper>
+            </Box>
         </Center>
     )
 }

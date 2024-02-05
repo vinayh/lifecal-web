@@ -1,0 +1,20 @@
+.entry {
+    width: 1rem;
+    height: 1rem;
+    margin: 0.25rem;
+}
+
+.filled {
+    background: blue;
+    border: 1px solid black;
+}
+
+.past {
+    background: grey;
+    border: 1px solid black;
+}
+
+.future {
+    background: white;
+    border: 1px dashed black;
+}
