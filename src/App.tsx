@@ -9,9 +9,9 @@ import Login from "./Login"
 import { Dashboard } from "./Dashboard"
 
 export default function App() {
-  const [user, loading, error] = useAuthState(auth)
+  const [authUser, authLoading, authError] = useAuthState(auth)
 
   return <MantineProvider theme={theme}>
-    {loading ? <>Loading...</> : (user ? <Dashboard /> : <Login />)}
+    {authLoading ? <>Loading...</> : (authUser ? <Dashboard /> : <Login />)}
   </MantineProvider>;
 }

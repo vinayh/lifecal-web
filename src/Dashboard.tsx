@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { useForm } from "@mantine/form"
 import { DateInput } from "@mantine/dates";
-import { Notification, TextInput, Button, Group, Box } from "@mantine/core"
+import { TextInput, Button, Group, Text, Paper, Center, Container } from "@mantine/core"
 import { useAuthState } from "react-firebase-hooks/auth"
 
 import { auth, UserZ, User } from "./user"
@@ -16,21 +16,22 @@ function UserProfile({ user: { uid, created, name, birth, expYears, email } }: {
     const [updateMessage, setUpdateMessage] = useState<string | null>(null)
     const [authUser, authLoading, authError] = useAuthState(auth)
 
-    const onSubmit = (formEntry: { name: string, birth: string | Date, expYears: string | number, email: string }) => {
+    const updateProfile = (formEntry: { name: string, birth: string | Date, expYears: string | number, email: string }) => {
         setUpdateStatus(Status.Loading)
-        setUpdateMessage("Updating your user profile...")
+        setUpdateMessage("Saving profile...")
         const { name, birth, expYears, email } = formEntry
+        console.log(new Date(birth))
         if (!(authUser == null)) {
             authUser.getIdToken()
                 .then((idToken: string) => fetch(`${BACKEND_URL}/updateUser?uid=${uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}&email=${email}`))
                 .then(res => {
                     if (res.ok) {
                         setUpdateStatus(Status.Success)
-                        setUpdateMessage("User profile successfully updated.")
+                        setUpdateMessage("Profile updated.")
                     }
                     else {
                         setUpdateStatus(Status.Error)
-                        setUpdateMessage("Error updating user profile. Please try again.")
+                        setUpdateMessage("Please try again.")
                     }
                 })
         }
@@ -46,48 +47,55 @@ function UserProfile({ user: { uid, created, name, birth, expYears, email } }: {
         validate: {
             email: (value) => /^\S+@\S+$/.test(value) ? null : "Invalid email",
             name: (value) => (value.length >= 1) ? null : "Invalid name",
-            birth: (value) => new Date(value) ? null : "Invalid date of birth",
+            birth: (value) => (value instanceof Date || !isNaN(Date.parse(value))) ? null : "Invalid date of birth",
             expYears: (value) => (typeof value === "number" || /^-?\d+$/.test(value)) ? null : "Invalid life expectancy"
         },
     });
 
     return (
-        <Box maw={340} mx="auto">
-            UID: {uid}, user created: {created.toISOString()}
-            <StatusNotification status={updateStatus} message={updateMessage} />
-            <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
-                <TextInput
-                    withAsterisk
-                    label="Email"
-                    placeholder="your@email.com"
-                    {...form.getInputProps("email")}
-                />
+        <Center pt={25}>
+            <Paper radius="md" p="xl" shadow="lg" w={400}>
+                <Text size="lg" fw={500}>
+                    Update profile
+                </Text>
+                {/* UID: {uid}, user created: {created.toISOString()} */}
+                <form onSubmit={form.onSubmit(updateProfile)}>
+                    <TextInput
+                        withAsterisk
+                        label="Email"
+                        placeholder="your@email.com"
+                        {...form.getInputProps("email")}
+                    />
 
-                <TextInput
-                    withAsterisk
-                    label="Name"
-                    {...form.getInputProps("name")}
-                />
+                    <TextInput
+                        withAsterisk
+                        label="Name"
+                        {...form.getInputProps("name")}
+                    />
 
-                <DateInput
-                    withAsterisk
-                    label="Date of birth"
-                    placeholder="1 January 1984"
-                    {...form.getInputProps("birth")}
-                />
+                    <DateInput
+                        withAsterisk
+                        label="Date of birth"
+                        placeholder="1 January 1984"
+                        {...form.getInputProps("birth")}
+                    />
 
-                <TextInput
-                    withAsterisk
-                    label="Life expectancy (years)"
-                    placeholder="80"
-                    {...form.getInputProps("expYears")}
-                />
+                    <TextInput
+                        withAsterisk
+                        label="Life expectancy (years)"
+                        placeholder="80"
+                        {...form.getInputProps("expYears")}
+                    />
 
-                <Group justify="flex-end" mt="md">
-                    <Button type="submit">Submit</Button>
-                </Group>
-            </form>
-        </Box>
+                    <Group preventGrowOverflow={false} wrap="nowrap" mt="md">
+                        <Container w={290} p={0} h={55}>
+                            <StatusNotification status={updateStatus} message={updateMessage} />
+                        </Container>
+                        <Button type="submit" radius="md" w={110}>Submit</Button>
+                    </Group>
+                </form>
+            </Paper>
+        </Center>
     )
 }
 
@@ -123,6 +131,7 @@ export function Dashboard(props) {
         }
         fetchUser()
     }, [])
+
     if (loading) {
         return <p>Loading user data...</p>
     } else if (error) {
@@ -130,17 +139,11 @@ export function Dashboard(props) {
     } else if (!(user == null)) {
         const result = UserZ.safeParse(user)
         if (!result.success) {
-            return <p>Invalid user profile</p>
+            return <UserProfile user={user} />
         } else {
-            return <UserProfile user={result.data} />
+            return <UserProfile user={user} />
+            // TODO: Uncomment below to enable Calendar view for completed user profile
+            // return <Calendar user={result.data} />
         }
-
-        // TODO: Uncomment below to enable Calendar view for completed user profile
-
-        // if (!result.success) {
-        //     return <UserProfile user={user} />
-        // } else {
-        //     return <Calendar user={result.data} />
-        // }
     }
 }

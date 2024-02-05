@@ -12,7 +12,7 @@ import {
     Button,
     ButtonProps,
     Divider,
-    Checkbox,
+    Center,
     Anchor,
     Stack,
 } from '@mantine/core';
@@ -20,88 +20,65 @@ import {
 import { authProvider, authEmailPassword } from "./user"
 
 export default function Login(props: PaperProps) {
-    const [loginOrRegister, toggleLoginOrRegister] = useToggle(['login', 'register']);
+    // const [loginOrRegister, toggleLoginOrRegister] = useToggle(['login', 'register']);
+
+    // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
+    const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
+
     const form = useForm({
-        initialValues: {email: "", name: "", password: ""},
+        initialValues: { email: "", password: "" },
         validate: {
-            email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
-            password: (val) => (val.length <= 8 ? 'Password should include at least 8 characters' : null),
+            email: val => valEmailZod(val) ? null : "Invalid email",
+            password: val => (val.length >= 8 ? null : "Password should include at least 8 characters"),
         },
     });
 
     return (
-        <Paper radius="md" p="xl" withBorder {...props}>
-            <Text size="lg" fw={500}>
-                Welcome to LifeCal, {loginOrRegister} with
-            </Text>
+        <Center pt={25}>
+            <Paper radius="md" p="xl" shadow="lg" {...props}>
+                <Text size="lg" fw={500}>
+                    Welcome to LifeCal, login or register with
+                </Text>
 
-            <Group grow mb="md" mt="md">
-                <GoogleButton radius="xl" onClick={() => authProvider("google")}>Google</GoogleButton>
-                <GithubButton radius="xl" onClick={() => authProvider("github")}>GitHub</GithubButton>
-            </Group>
-
-            <Divider label="Or continue with email" labelPosition="center" my="lg" />
-
-            <form onSubmit={form.onSubmit(e => authEmailPassword(e))}>
-                <Stack>
-                    {loginOrRegister === 'register' && (
-                        <TextInput
-                            label="Name"
-                            placeholder="Your name"
-                            value={form.values.name}
-                            onChange={(event) => form.setFieldValue('name', event.currentTarget.value)}
-                            radius="md"
-                        />
-                    )}
-
-                    <TextInput
-                        required
-                        label="Email"
-                        placeholder="hello@mantine.dev"
-                        value={form.values.email}
-                        onChange={(event) => form.setFieldValue('email', event.currentTarget.value)}
-                        error={form.errors.email && 'Invalid email'}
-                        radius="md"
-                    />
-
-                    <PasswordInput
-                        required
-                        label="Password"
-                        placeholder="Your password"
-                        value={form.values.password}
-                        onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
-                        error={form.errors.password && 'Password should include at least 8 characters'}
-                        radius="md"
-                    />
-
-                    {/* {loginOrRegister === 'register' && (
-                        <Checkbox
-                            label="I accept terms and conditions"
-                            checked={form.values.terms}
-                            onChange={(event) => form.setFieldValue('terms', event.currentTarget.checked)}
-                        />
-                    )} */}
-                </Stack>
-
-                <Group justify="space-between" mt="xl">
-                    <Anchor component="button" type="button" c="dimmed" onClick={() => toggleLoginOrRegister()} size="xs">
-                        {loginOrRegister === 'register'
-                            ? 'Already have an account? Login'
-                            : "Don't have an account? Register"}
-                    </Anchor>
-                    <Button type="submit" radius="xl">
-                        {upperFirst(loginOrRegister)}
-                    </Button>
+                <Group grow mb="md" mt="md">
+                    <GoogleButton radius="md" onClick={() => authProvider("google")}>Google</GoogleButton>
+                    <GithubButton radius="md" onClick={() => authProvider("github")}>GitHub</GithubButton>
                 </Group>
-            </form>
-        </Paper>
-    );
+
+                <Divider label="Or continue with email" labelPosition="center" my="lg" />
+
+                <form onSubmit={form.onSubmit(authEmailPassword)}>
+                    <Stack>
+                        <TextInput
+                            required
+                            label="Email"
+                            placeholder="your@email.com"
+                            radius="md"
+                            {...form.getInputProps("email")}
+                        />
+
+                        <PasswordInput
+                            required
+                            label="Password"
+                            placeholder="Your password"
+                            radius="md"
+                            {...form.getInputProps("password")}
+                        />
+                    </Stack>
+
+                    <Group justify="flex-end" mt="md">
+                        <Button type="submit" radius="md">Login | Register</Button>
+                    </Group>
+                </form>
+            </Paper>
+        </Center>
+    )
 }
 
 function GoogleButton(props: ButtonProps & React.ComponentPropsWithoutRef<'button'>) {
-    return <Button leftSection={<IconBrandGoogle color="var(--mantine-color-blue-filled)" />} variant="default" {...props} />
+    return <Button leftSection={<IconBrandGoogle />} {...props} />
 }
 
 function GithubButton(props: ButtonProps & React.ComponentPropsWithoutRef<'button'>) {
-  return <Button leftSection={<IconBrandGithub color="var(--mantine-color-blue-filled)" />} variant="default" {...props} />
+    return <Button leftSection={<IconBrandGithub />} {...props} />
 }

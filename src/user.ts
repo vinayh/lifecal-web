@@ -6,7 +6,7 @@ import { useAuthState } from "react-firebase-hooks/auth"
 import { app } from "./firebase"
 import { Login } from "./Login"
 
-export const LoginFormEntryZ = z.object({ email: z.string().email(), name: z.string(), password: z.string() })
+export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
 
 const SIGNIN_SUCCESS_URL = "test"
 const TERMS_CONDITIONS_URL = "test"
@@ -44,9 +44,10 @@ export const authProvider = async (providerName: string) => {
 }
 
 export const authEmailPassword = async (e: z.infer<typeof LoginFormEntryZ>) => {
-    const { email, name, password } = LoginFormEntryZ.parse(e)
+    const { email, password } = LoginFormEntryZ.parse(e)
     signInWithEmailAndPassword(auth, email, password)
         .catch(() => createUserWithEmailAndPassword(auth, email, password))
+        // .then(user => )
 }
 
 // export default () => {

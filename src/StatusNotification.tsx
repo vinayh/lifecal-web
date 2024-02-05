@@ -16,20 +16,20 @@ export function StatusNotification({ status, message }: { status: Status | null,
     }
     else if (status === Status.Error) {
         return (
-            <Notification icon={IconError} color="red" title="Error">
+            <Notification icon={IconError} withCloseButton={false} color="red" title="Error">
                 {message}
             </Notification>
         )
     }
     else if (status === Status.Loading) {
         return (
-            <Notification loading={true} title="Updating">
+            <Notification loading={true} withCloseButton={false} title="Updating">
                 {message}
             </Notification>
         )
     } else if (status === Status.Success) {
         return (
-            <Notification icon={IconSuccess} title="Success">
+            <Notification icon={IconSuccess} withCloseButton={false} title="Success">
                 {message}
             </Notification>
         )
