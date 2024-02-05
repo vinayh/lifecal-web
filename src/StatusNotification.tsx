@@ -1,11 +1,7 @@
 import { IconX, IconCheck } from "@tabler/icons-react"
 import { Notification, Loader, rem } from "@mantine/core"
 
-export enum Status {
-    Loading,
-    Success,
-    Error
-}
+import { Status } from "./user"
 
 const IconError = <IconX style={{ width: rem(20), height: rem(20) }} />
 const IconSuccess = <IconCheck style={{ width: rem(20), height: rem(20) }} />

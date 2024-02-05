@@ -12,6 +12,12 @@ const SIGNIN_SUCCESS_URL = "test"
 const TERMS_CONDITIONS_URL = "test"
 const PRIVACY_POLICY_URL = "test"
 
+export enum Status {
+    Loading,
+    Success,
+    Error
+}
+
 export const auth = getAuth(app)
 
 export const TagZ = z.object({
@@ -27,9 +33,11 @@ export type Entry = z.infer<typeof EntryZ>
 
 
 export const UserZ = z.object({
-    uid: z.string(), created: z.coerce.date(), name: z.string(), birth: z.coerce.date(), expYears: z.number(), email: z.string().email().optional(), entries: z.array(EntryZ), tags: z.array(TagZ),
+    uid: z.string(), created: z.coerce.date(), name: z.string(), birth: z.coerce.date(), expYears: z.number(), email: z.string().email(), entries: z.array(EntryZ), tags: z.array(TagZ),
 });
 export type User = z.infer<typeof UserZ>
+
+export const InitialUserZ = UserZ.partial({ name: true, birth: true, expYears: true, email: true })
 
 const providers: { [index: string]: AuthProvider } = {
     github: new GithubAuthProvider().addScope("read:user"),
