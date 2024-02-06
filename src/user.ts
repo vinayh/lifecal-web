@@ -14,10 +14,21 @@ const providers: { [index: string]: AuthProvider } = {
     google: new GoogleAuthProvider().addScope("https://www.googleapis.com/auth/userinfo.profile")
 }
 
-export enum Status {
+export enum LoadStatus {
     Loading,
     Success,
     Error
+}
+
+export enum UserStatus {
+    HasProfile,
+    IncompleteProfile,
+    InvalidProfile,
+    LoadingProfile,
+    ProfileLoadError,
+    SignedIn,
+    LoadingUser,
+    NoUser
 }
 
 export const auth = getAuth(app)
@@ -65,9 +76,9 @@ export const authEmailPassword = async (e: z.infer<typeof LoginFormEntryZ>, setL
     console.log(user)
 }
 
-export async function fetchUser(authUser: AuthUser | null | undefined): Promise<{ status: Status, message: string } | { status: Status, user: User }> {
+export async function fetchUser(authUser: AuthUser | null | undefined): Promise<{ status: LoadStatus, message: string } | { status: LoadStatus, user: User }> {
     if (authUser == null) {
-        return { status: Status.Error, message: "No user session" }
+        return { status: LoadStatus.Error, message: "No user session" }
     }
     const res = await authUser.getIdToken(false)
         .then(idToken => fetch(`${BACKEND_URL}/getUser?uid=${authUser.uid}&idToken=${idToken}`))
@@ -76,12 +87,12 @@ export async function fetchUser(authUser: AuthUser | null | undefined): Promise<
             .then(user => {
                 if (user.created) { user.created = new Date(user.created) }
                 if (user.birth) { user.birth = new Date(user.birth) }
-                return { status: Status.Success, user: user as User }
+                return { status: LoadStatus.Success, user: user as User }
             })
-            .catch(error => { return { status: Status.Error, message: "Error parsing user: " + error.message } })
+            .catch(error => { return { status: LoadStatus.Error, message: "Error parsing user: " + error.message } })
     } else {
         return res.text()
-            .then(text => { return { status: Status.Error, message: "Server error, response: " + text } })
+            .then(text => { return { status: LoadStatus.Error, message: "Server error, response: " + text } })
     }
 }
 
@@ -93,18 +104,18 @@ export async function updateUserProfile(authUser: AuthUser, formEntry: ProfileFo
     return authUser.getIdToken()
         .then((idToken: string) => fetch(`${BACKEND_URL}/updateUserProfile?uid=${authUser.uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}&email=${email}`))
         .then(res => {
-            if (res.ok) { return { status: Status.Success, message: "Profile updated." } }
-            else { return { status: Status.Error, message: "Server error." } }
+            if (res.ok) { return { status: LoadStatus.Success, message: "Profile updated." } }
+            else { return { status: LoadStatus.Error, message: "Server error." } }
         })
-        .catch(_ => { return { status: Status.Error, message: "Error updating profile." } })
+        .catch(_ => { return { status: LoadStatus.Error, message: "Error updating profile." } })
 }
 
 export async function fetchUserOuter(authUser: AuthUser | null | undefined,
-    setLoadUserStatus: Dispatch<SetStateAction<Status>>,
+    setLoadUserStatus: Dispatch<SetStateAction<LoadStatus>>,
     setUser: Dispatch<SetStateAction<User | undefined>>,
     setErrorMessage: Dispatch<SetStateAction<string | undefined>>) {
     if (authUser == null) {
-        setLoadUserStatus(Status.Error)
+        setLoadUserStatus(LoadStatus.Error)
         return
     }
     const res = await authUser.getIdToken(false)
@@ -120,16 +131,16 @@ export async function fetchUserOuter(authUser: AuthUser | null | undefined,
             })
             .then(user => {
                 setUser(user)
-                setLoadUserStatus(Status.Success)
+                setLoadUserStatus(LoadStatus.Success)
             })
             .catch(error => {
-                setLoadUserStatus(Status.Error)
+                setLoadUserStatus(LoadStatus.Error)
                 setErrorMessage("Error parsing user: " + error.message)
             })
     } else {
         res.text()
             .then(text => {
-                setLoadUserStatus(Status.Error)
+                setLoadUserStatus(LoadStatus.Error)
                 setErrorMessage("Server error, response: " + text)
             })
     }

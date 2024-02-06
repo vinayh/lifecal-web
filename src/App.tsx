@@ -6,42 +6,47 @@ import { useState, useEffect } from "react"
 import { Route, createBrowserRouter, useRoutes, Navigate, createRoutesFromElements, RouterProvider } from "react-router-dom"
 import { useAuthState } from "react-firebase-hooks/auth"
 
-import { auth, User, Status, fetchUser } from "./user"
+import { auth, User, UserZ, InitialUserZ, LoadStatus, UserStatus, fetchUser } from "./user"
 import Login from "./Login"
 import { Calendar } from "./Calendar"
 import { UserProfile } from "./UserProfile"
 import PrivateRoute from "./PrivateRoute"
 
-export enum UserStatus {
-  HasProfile,
-  IncompleteProfile,
-  LoadingProfile,
-  SignedIn,
-  LoadingUser,
-  NoUser
-}
-
 export default function App() {
   const [authUser, authLoading, authError] = useAuthState(auth)
   const [user, setUser] = useState<User | null>(null)
-  // const [userStatus, setUserStatus] = useState<UserStatus>(UserStatus.NoUser)
-  const [loadUserStatus, setLoadUserStatus] = useState<Status>(Status.Loading)
+  const [userStatus, setUserStatus] = useState<UserStatus>(UserStatus.NoUser)
   const [loadUserError, setLoadUserError] = useState<string | undefined>()
 
   useEffect(() => {
-    if (user == null) {
-      setLoadUserStatus(Status.Loading)
+    if (userStatus === UserStatus.NoUser && authUser != null && authError == null) {
+      setUserStatus(UserStatus.SignedIn)
+    }
+    if (userStatus === UserStatus.SignedIn) {
+      setUserStatus(UserStatus.LoadingProfile)
       fetchUser(authUser)
         .then(res => {
-          setLoadUserStatus(res.status)
-          if (res.status === Status.Success) {
+          if (res.status === LoadStatus.Success) {
             console.log(res.user)
-            setUser(res.user)
+            const result = UserZ.safeParse(user)
+            if (result.success) {
+              setUser(result.data)
+              setUserStatus(UserStatus.HasProfile)
+            } else {
+              const initResult = InitialUserZ.safeParse(user)
+              if (initResult.success) {
+                setUser(initResult.data as User)
+                setUserStatus(UserStatus.IncompleteProfile)
+              } else {
+                setUserStatus(UserStatus.InvalidProfile)
+              }
+            }
+          } else {
+            setUserStatus(UserStatus.ProfileLoadError)
           }
-          else { setLoadUserError(res.message) }
         })
     }
-  }, [authUser])
+  }, [authUser, userStatus])
 
   const calendarElement = <PrivateRoute authUser={authUser} authLoading={authLoading} user={user} setUser={setUser}>
     <Calendar user={user} />
@@ -58,13 +63,6 @@ export default function App() {
       <Route path="profile" element={profileElement} />
     </Route>
   ))
-
-  // const element = useRoutes([
-  //   { path: "/", element: calendarElement },
-  //   { path: "/calendar", element: calendarElement },
-  //   { path: "/login", element: authUser == null ? <Login /> : <Navigate to={"/"} /> },
-  //   { path: "/profile", element: profileElement },
-  // ])
 
   return <MantineProvider theme={theme}>
     <Notifications />

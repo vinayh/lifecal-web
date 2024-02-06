@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react"
 import { useAuthState } from "react-firebase-hooks/auth"
 
-import { auth, fetchUser, UserZ, User, Status, InitialUserZ } from "./user"
+import { auth, fetchUser, UserZ, User, LoadStatus, InitialUserZ } from "./user"
 import { UserProfile } from "./UserProfile";
 import { Calendar } from "./Calendar"
 
 export function Dashboard(props) {
     const [authUser, authLoading, authError] = useAuthState(auth)
-    const [loadUserStatus, setLoadUserStatus] = useState<Status>(Status.Loading)
+    const [loadUserStatus, setLoadUserStatus] = useState<LoadStatus>(LoadStatus.Loading)
     const [user, setUser] = useState<User | undefined>()
     const [errorMessage, setErrorMessage] = useState<string | undefined>()
 
@@ -15,13 +15,13 @@ export function Dashboard(props) {
         fetchUser(authUser, setLoadUserStatus, setUser, setErrorMessage)
     }, [authUser])
 
-    if (loadUserStatus === Status.Loading) {
+    if (loadUserStatus === LoadStatus.Loading) {
         return <p>Loading user data...</p>
-    } else if (loadUserStatus === Status.Success) {
+    } else if (loadUserStatus === LoadStatus.Success) {
         const result = UserZ.safeParse(user)
         if (result.success) { return <Calendar user={result.data} /> }
         else { return <UserProfile user={InitialUserZ.parse(user) as User} /> }
-    } else if (loadUserStatus === Status.Error) {
+    } else if (loadUserStatus === LoadStatus.Error) {
         return <p>Cannot load user. {errorMessage}</p>
     }
 }

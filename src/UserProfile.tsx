@@ -3,19 +3,19 @@ import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { TextInput, Button, Group, Text, Paper, Center, Container } from "@mantine/core";
 import { User as AuthUser } from "firebase/auth"
-import { auth, User, Status, ProfileFormEntry, updateUserProfile, fetchUser } from "./user";
+import { auth, User, LoadStatus, ProfileFormEntry, updateUserProfile, fetchUser } from "./user";
 import { BACKEND_URL } from "./Dashboard";
 
 export function UserProfile({ user, authUser }: { user: User | null, authUser: AuthUser | null | undefined }) {
     const [errorMessage, setErrorMessage] = useState<string | undefined>()
-    const [updateStatus, setUpdateStatus] = useState<Status | null>(null);
+    const [updateStatus, setUpdateStatus] = useState<LoadStatus | null>(null);
     const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
     const { uid, name, birth, expYears, email } = user
 
     const onSubmitProfileUpdate = (formEntry: ProfileFormEntry) => {
         form.validate()
-        setUpdateStatus(Status.Loading)
+        setUpdateStatus(LoadStatus.Loading)
         setUpdateMessage("Saving profile...")
         if (authUser !== null && authUser !== undefined) {
             updateUserProfile(authUser, formEntry)
