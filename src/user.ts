@@ -37,29 +37,32 @@ export type Entry = z.infer<typeof EntryZ>
 
 
 export const UserZ = z.object({
-    uid: z.string(), created: z.coerce.date(), name: z.string(), birth: z.coerce.date(), expYears: z.number(), email: z.string().email(), entries: z.array(EntryZ), tags: z.array(TagZ),
+    uid: z.string(), created: z.coerce.date(), name: z.string(), birth: z.date(), expYears: z.number(), email: z.string().email(), entries: z.array(EntryZ), tags: z.array(TagZ),
 });
 export type User = z.infer<typeof UserZ>
 
 export const InitialUserZ = UserZ.partial({ name: true, birth: true, expYears: true, email: true })
 
-export const authProvider = async (providerName: string) => {
+export const authProvider = async (providerName: string, setLoggingIn: Dispatch<SetStateAction<boolean>>) => {
+    setLoggingIn(true)
     if (!(providerName in providers)) { throw Error }
     const user = await signInWithPopup(auth, providers[providerName])
         .then(res => res.user)
+        .then(_ => setLoggingIn(false))
     console.log(user)
 }
 
 export const authEmailPassword = async (e: z.infer<typeof LoginFormEntryZ>, setLoggingIn: Dispatch<SetStateAction<boolean>>) => {
     setLoggingIn(true)
     const { email, password } = LoginFormEntryZ.parse(e)
-    signInWithEmailAndPassword(auth, email, password)
+    const user = await signInWithEmailAndPassword(auth, email, password)
         .catch(_ => createUserWithEmailAndPassword(auth, email, password))
         .then(_ => setLoggingIn(false))
         .catch(error => {
             setLoggingIn(false)
             console.log("Error logging in: ", error.message)
         })
+    console.log(user)
 }
 
 export async function fetchUser(authUser: AuthUser | null | undefined): Promise<{ status: Status, message: string } | { status: Status, user: User }> {
@@ -70,12 +73,9 @@ export async function fetchUser(authUser: AuthUser | null | undefined): Promise<
         .then(idToken => fetch(`${BACKEND_URL}/getUser?uid=${authUser.uid}&idToken=${idToken}`))
     if (res.ok) {
         return res.json()
-            .then(fetched => {
-                const user = {
-                    ...fetched,
-                    created: (fetched.created !== null) ? new Date(fetched.created) : null,
-                    birth: (fetched.birth !== null) ? new Date(fetched.birth) : null,
-                }
+            .then(user => {
+                if (user.created) { user.created = new Date(user.created) }
+                if (user.birth) { user.birth = new Date(user.birth) }
                 return { status: Status.Success, user: user as User }
             })
             .catch(error => { return { status: Status.Error, message: "Error parsing user: " + error.message } })

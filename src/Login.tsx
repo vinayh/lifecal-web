@@ -44,14 +44,15 @@ export default function Login(props: PaperProps) {
                     </Text>
 
                     <Group grow mb="md" mt="md">
-                        <GoogleButton radius="md" onClick={() => authProvider("google")}>Google</GoogleButton>
-                        <GithubButton radius="md" onClick={() => authProvider("github")}>GitHub</GithubButton>
+                        <GoogleButton radius="md" onClick={() => authProvider("google", setLoggingIn)}>Google</GoogleButton>
+                        <GithubButton radius="md" onClick={() => authProvider("github", setLoggingIn)}>GitHub</GithubButton>
                     </Group>
 
                     <Divider label="Or continue with email" labelPosition="center" my="lg" />
-
+                    
                     <form onSubmit={form.onSubmit((values) => authEmailPassword(values, setLoggingIn))}>
                         <Stack>
+                        <LoadingOverlay visible={loggingIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
                             <TextInput
                                 required
                                 label="Email"
