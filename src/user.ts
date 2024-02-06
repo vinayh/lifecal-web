@@ -21,13 +21,14 @@ export enum LoadStatus {
 }
 
 export enum UserStatus {
-    HasProfile,
+    CompleteProfile,
     IncompleteProfile,
     InvalidProfile,
     LoadingProfile,
     ProfileLoadError,
     SignedIn,
-    LoadingUser,
+    SignInError,
+    SigningIn,
     NoUser
 }
 
@@ -54,26 +55,19 @@ export type User = z.infer<typeof UserZ>
 
 export const InitialUserZ = UserZ.partial({ name: true, birth: true, expYears: true, email: true })
 
-export const authProvider = async (providerName: string, setLoggingIn: Dispatch<SetStateAction<boolean>>) => {
-    setLoggingIn(true)
+export const authProvider = async (providerName: string) => {
     if (!(providerName in providers)) { throw Error }
-    const user = await signInWithPopup(auth, providers[providerName])
+    await signInWithPopup(auth, providers[providerName])
         .then(res => res.user)
-        .then(_ => setLoggingIn(false))
-    console.log(user)
 }
 
-export const authEmailPassword = async (e: z.infer<typeof LoginFormEntryZ>, setLoggingIn: Dispatch<SetStateAction<boolean>>) => {
-    setLoggingIn(true)
+export const authEmailPassword = async (e: z.infer<typeof LoginFormEntryZ>) => {
     const { email, password } = LoginFormEntryZ.parse(e)
-    const user = await signInWithEmailAndPassword(auth, email, password)
+    await signInWithEmailAndPassword(auth, email, password)
         .catch(_ => createUserWithEmailAndPassword(auth, email, password))
-        .then(_ => setLoggingIn(false))
         .catch(error => {
-            setLoggingIn(false)
             console.log("Error logging in: ", error.message)
         })
-    console.log(user)
 }
 
 export async function fetchUser(authUser: AuthUser | null | undefined): Promise<{ status: LoadStatus, message: string } | { status: LoadStatus, user: User }> {

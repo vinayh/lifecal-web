@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { useState } from "react"
+import { Dispatch, SetStateAction, useState } from "react"
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import {
@@ -8,22 +8,18 @@ import {
     Text,
     Paper,
     Group,
-    PaperProps,
     Button,
     Box,
     LoadingOverlay,
     ButtonProps,
     Divider,
     Center,
-    Anchor,
     Stack,
 } from '@mantine/core';
 
-import { authProvider, authEmailPassword } from "./user"
+import { authProvider, authEmailPassword, UserStatus, LoginFormEntryZ } from "./user"
 
-export default function Login(props: PaperProps) {
-    const [loggingIn, setLoggingIn] = useState(false)
-
+export default function Login({ userStatus, setUserStatus }: { userStatus: UserStatus, setUserStatus: Dispatch<SetStateAction<UserStatus>> }) {
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
 
@@ -35,24 +31,36 @@ export default function Login(props: PaperProps) {
         },
     });
 
+    const signIn = async (provider: string, values: z.infer<typeof LoginFormEntryZ> | null = null) => {
+        const signInAsync = (() => {
+            if (provider === "google") { return authProvider("google") }
+            else if (provider === "github") { return authProvider("github") }
+            else if (provider === "email" && values !== null) { return authEmailPassword(values) }
+            else { throw new Error("Invalid sign in method") }
+        })()
+        setUserStatus(UserStatus.SigningIn)
+        signInAsync
+            .then(_ => setUserStatus(UserStatus.SignedIn))
+            .catch(_ => setUserStatus(UserStatus.SignInError))
+    }
+
     return (
         <Center pt={25}>
             <Box>
-                <Paper radius="md" p="xl" shadow="lg" {...props}>
+                <Paper radius="md" p="xl" shadow="lg">
                     <Text size="lg" fw={500}>
                         Welcome to LifeCal, login or register with
                     </Text>
 
                     <Group grow mb="md" mt="md">
-                        <GoogleButton radius="md" onClick={() => authProvider("google", setLoggingIn)}>Google</GoogleButton>
-                        <GithubButton radius="md" onClick={() => authProvider("github", setLoggingIn)}>GitHub</GithubButton>
+                        <GoogleButton radius="md" onClick={() => signIn("google")}>Google</GoogleButton>
+                        <GithubButton radius="md" onClick={() => signIn("github")}>GitHub</GithubButton>
                     </Group>
 
                     <Divider label="Or continue with email" labelPosition="center" my="lg" />
-                    
-                    <form onSubmit={form.onSubmit((values) => authEmailPassword(values, setLoggingIn))}>
+
+                    <form onSubmit={form.onSubmit(values => signIn("email", values))}>
                         <Stack>
-                        <LoadingOverlay visible={loggingIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
                             <TextInput
                                 required
                                 label="Email"
@@ -71,7 +79,7 @@ export default function Login(props: PaperProps) {
                         </Stack>
 
                         <Group justify="flex-end" mt="md">
-                            <LoadingOverlay visible={loggingIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+                            <LoadingOverlay visible={userStatus === UserStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
                             <Button type="submit" radius="md">Login | Register</Button>
                         </Group>
                     </form>
