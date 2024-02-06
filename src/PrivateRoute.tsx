@@ -8,25 +8,9 @@ import { User, UserZ, InitialUserZ, Status, fetchUser } from "./user"
 
 export default function PrivateRoute({ authUser, authLoading, user, setUser, children }: { authUser: AuthUser | null | undefined, authLoading: boolean, user: User | null, setUser: Dispatch<SetStateAction<User | null>>, children: ReactNode }) {
     const [loadUserStatus, setLoadUserStatus] = useState<Status>(Status.Loading)
-    const [errorMessage, setErrorMessage] = useState<string | undefined>()
-
+    
     console.log(`PrivateRoute - loading: ${authLoading}, authUser:`, authUser)
-    if (authUser == null && authLoading == false) { return <Navigate to="/login" /> }
-
-    useEffect(() => {
-        if (user == null) {
-            setLoadUserStatus(Status.Loading)
-            fetchUser(authUser)
-                .then(res => {
-                    setLoadUserStatus(res.status)
-                    if (res.status === Status.Success) {
-                        console.log(res.user)
-                        setUser(res.user)
-                    }
-                    else { setErrorMessage(res.message) }
-                })
-        }
-    }, [authUser])
+    if (authUser == null && authLoading == false) { return <Navigate to="/login" replace /> }
 
     if (loadUserStatus === Status.Loading) {
         return <p>Loading user data...</p>

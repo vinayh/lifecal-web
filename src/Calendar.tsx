@@ -19,7 +19,7 @@ const generateEntries = (user: User): Map<Date, Entry | null> => {
 const renderEntry = (date: Date, entry: Entry | null): ReactElement => {
     const divClass = (isPast(date)) ? ((entry !== null) ? "entry filled" : "entry past") : "entry future"
     return (
-        <Tooltip label={date.toDateString()}>
+        <Tooltip key={date.toDateString()} label={date.toDateString()}>
             <div className={divClass}></div>
         </Tooltip>
     )
