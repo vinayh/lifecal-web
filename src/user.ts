@@ -21,15 +21,15 @@ export enum LoadStatus {
 }
 
 export enum UserStatus {
-    CompleteProfile,
-    IncompleteProfile,
-    InvalidProfile,
-    LoadingProfile,
-    ProfileLoadError,
-    SignedIn,
-    SignInError,
-    SigningIn,
-    NoUser
+    CompleteProfile = "Completed profile",
+    IncompleteProfile = "Incomplete profile",
+    InvalidProfile = "Invalid profile",
+    LoadingProfile = "Loading profile",
+    ProfileLoadError = "Error loading profile",
+    SignedIn = "User signed in",
+    SignInError = "Error signing user in",
+    SigningIn = "Signing in",
+    NoUser = "No user session"
 }
 
 export const auth = getAuth(app)

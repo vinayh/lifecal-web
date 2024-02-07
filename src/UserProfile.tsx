@@ -11,7 +11,7 @@ export function UserProfile({ user, authUser }: { user: User | null, authUser: A
     const [updateStatus, setUpdateStatus] = useState<LoadStatus | null>(null);
     const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
-    const { uid, name, birth, expYears, email } = user
+    const { name, birth, expYears, email } = user
 
     const onSubmitProfileUpdate = (formEntry: ProfileFormEntry) => {
         form.validate()

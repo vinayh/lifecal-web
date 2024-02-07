@@ -58,38 +58,55 @@ export default function App() {
   //   <UserProfile user={user} authUser={authUser} />
   // </PrivateRoute>
 
-  const InitialProfile = ({ children }) => {
-    if (userStatus === UserStatus.IncompleteProfile || userStatus === UserStatus.CompleteProfile) { return children }
-    else { return <Navigate to="/login" /> }
+  const InitialProfile = ({ children = <UserProfile user={user} authUser={authUser} /> } = {}) => {
+    console.log("InitialProfile -", userStatus)
+    if ([UserStatus.CompleteProfile, UserStatus.IncompleteProfile, UserStatus.LoadingProfile, UserStatus.SignedIn].includes(userStatus)) {
+      console.log("InitialProfile - loading children")
+      return children
+    }
+    else {
+      return <Navigate to="/login" />
+    }
   }
   
-  const CompleteProfile = ({ children }) => {
-    console.log(userStatus)
-    if (userStatus === UserStatus.CompleteProfile) { return children }
-    else { return InitialProfile({ children }) }
+  const CompleteProfile = ({ children = <Calendar user={user} /> } = {}) => {
+    console.log("CompleteProfile -", userStatus)
+    if (userStatus === UserStatus.CompleteProfile) {
+      console.log("CompleteProfile - loading children")
+      return children
+    }
+    else { return InitialProfile() }
   }
 
-  const PublicOnlyProfile = ({ children }) => {
+  const PublicOnlyProfile = ({ children = <Login userStatus={userStatus} setUserStatus={setUserStatus} /> } = {}) => {
+    console.log("PublicOnlyProfile -", userStatus)
     if (userStatus === UserStatus.IncompleteProfile) {
       return <Navigate to="/profile" />
     } else if (userStatus !== UserStatus.CompleteProfile) {
       return <Navigate to="/calendar" />
       // TODO: Address other UserStatus cases such as SignedIn or 
-    } else { return children }
+    } else {
+      console.log("PublicOnlyProfile - loading children")
+      return children
+    }
   }
 
   const router = createBrowserRouter(createRoutesFromElements(
-    <Route path="/" element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} >
+    <>
+    {/* <Route path="/" element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} > */}
       <Route path="calendar" element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} />
-      <Route path="login" element={<PublicOnlyProfile><Login userStatus={userStatus} setUserStatus={setUserStatus} /></PublicOnlyProfile>} />
       <Route path="profile" element={<InitialProfile><UserProfile user={user} authUser={authUser} /></InitialProfile>} />
-    </Route>
+      <Route path="login" element={<PublicOnlyProfile><Login userStatus={userStatus} setUserStatus={setUserStatus} /></PublicOnlyProfile>} />
+    {/* </Route> */}
+    </>
   ))
 
   return <MantineProvider theme={theme}>
-    {userStatus.toString()}
+    User: {userStatus.toString()}
     <Notifications />
-    <RouterProvider router={router} />
-    {/* {(authUser !== null || authLoading == true) ? element : <Login />} */}
+    {(userStatus === UserStatus.LoadingProfile || userStatus === UserStatus.SigningIn || userStatus === UserStatus.NoUser)
+    ? <p>Loading...</p>
+    : <RouterProvider router={router} />
+    /*{ {(authUser !== null || authLoading == true) ? element : <Login />} */}
   </MantineProvider>;
 }
