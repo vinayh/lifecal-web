@@ -82,7 +82,7 @@ export default function App() {
     console.log("PublicOnlyProfile -", userStatus)
     if (userStatus === UserStatus.IncompleteProfile) {
       return <Navigate to="/profile" />
-    } else if (userStatus !== UserStatus.CompleteProfile) {
+    } else if (userStatus == UserStatus.CompleteProfile) {
       return <Navigate to="/calendar" />
       // TODO: Address other UserStatus cases such as SignedIn or 
     } else {
@@ -93,18 +93,17 @@ export default function App() {
 
   const router = createBrowserRouter(createRoutesFromElements(
     <>
-    {/* <Route path="/" element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} > */}
+      <Route index={true} element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} />
       <Route path="calendar" element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} />
       <Route path="profile" element={<InitialProfile><UserProfile user={user} authUser={authUser} /></InitialProfile>} />
       <Route path="login" element={<PublicOnlyProfile><Login userStatus={userStatus} setUserStatus={setUserStatus} /></PublicOnlyProfile>} />
-    {/* </Route> */}
     </>
   ))
 
   return <MantineProvider theme={theme}>
     User: {userStatus.toString()}
     <Notifications />
-    {(userStatus === UserStatus.LoadingProfile || userStatus === UserStatus.SigningIn || userStatus === UserStatus.NoUser)
+    {(userStatus === UserStatus.LoadingProfile || userStatus === UserStatus.SigningIn)
     ? <p>Loading...</p>
     : <RouterProvider router={router} />
     /*{ {(authUser !== null || authLoading == true) ? element : <Login />} */}

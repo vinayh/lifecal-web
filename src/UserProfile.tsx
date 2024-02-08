@@ -11,6 +11,7 @@ export function UserProfile({ user, authUser }: { user: User | null, authUser: A
     const [updateStatus, setUpdateStatus] = useState<LoadStatus | null>(null);
     const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
+    if (user !== null) {
     const { name, birth, expYears, email } = user
 
     const onSubmitProfileUpdate = (formEntry: ProfileFormEntry) => {
@@ -80,4 +81,8 @@ export function UserProfile({ user, authUser }: { user: User | null, authUser: A
             </Paper>
         </Center>
     </>
+    }
+    else {
+        return <p>No user session</p>
+    }
 }
