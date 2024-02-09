@@ -2,7 +2,7 @@ import { z } from "zod"
 import { Dispatch, SetStateAction } from "react"
 import { getAuth, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, AuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth"
 import "firebaseui/dist/firebaseui.css"
-import { User as AuthUser } from "firebase/auth"
+import { User as AuthUser, signOut as authSignOut } from "firebase/auth"
 
 import { app } from "./firebase"
 
@@ -67,6 +67,15 @@ export const authEmailPassword = async (e: z.infer<typeof LoginFormEntryZ>) => {
         .catch(_ => createUserWithEmailAndPassword(auth, email, password))
         .catch(error => {
             console.log("Error logging in: ", error.message)
+        })
+}
+
+export const signOut = async () => {
+    authSignOut(auth)
+        .then(() => {
+            console.log("Signed out successfully")
+        }).catch(error => {
+            console.log("Error signing out: ", error)
         })
 }
 

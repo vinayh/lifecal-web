@@ -4,9 +4,9 @@ import { Notifications } from "@mantine/notifications"
 import { theme } from "./theme"
 import { useState, useEffect } from "react"
 import { Route, createBrowserRouter, useRoutes, Navigate, createRoutesFromElements, RouterProvider } from "react-router-dom"
-import { useAuthState } from "react-firebase-hooks/auth"
+import { useAuthState, useSignOut } from "react-firebase-hooks/auth"
 
-import { auth, User, UserZ, InitialUserZ, LoadStatus, UserStatus, fetchUser } from "./user"
+import { auth, User, UserZ, InitialUserZ, LoadStatus, UserStatus, fetchUser, signOut } from "./user"
 import Login from "./Login"
 import { Calendar } from "./Calendar"
 import { UserProfile } from "./UserProfile"
@@ -101,6 +101,7 @@ export default function App() {
   ))
 
   return <MantineProvider theme={theme}>
+    <button name="signOut" onClick={signOut}/>
     User: {userStatus.toString()}
     <Notifications />
     {(userStatus === UserStatus.LoadingProfile || userStatus === UserStatus.SigningIn)
