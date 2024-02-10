@@ -10,7 +10,7 @@ import { auth, User, UserZ, InitialUserZ, LoadStatus, UserStatus, fetchUser, sig
 import Login from "./Login"
 import { Calendar } from "./Calendar"
 import { UserProfile } from "./UserProfile"
-import PrivateRoute from "./PrivateRoute"
+// import PrivateRoute from "./PrivateRoute"
 
 export default function App() {
   const [authUser, authLoading, authError] = useAuthState(auth)
@@ -93,7 +93,7 @@ export default function App() {
 
   const router = createBrowserRouter(createRoutesFromElements(
     <>
-      <Route index={true} element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} />
+      <Route index={true} element={<CompleteProfile><UserProfile user={user} authUser={authUser} /></CompleteProfile>} />
       <Route path="calendar" element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} />
       <Route path="profile" element={<InitialProfile><UserProfile user={user} authUser={authUser} /></InitialProfile>} />
       <Route path="login" element={<PublicOnlyProfile><Login userStatus={userStatus} setUserStatus={setUserStatus} /></PublicOnlyProfile>} />
