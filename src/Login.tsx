@@ -20,7 +20,7 @@ import { UserStatus } from "./user"
 import { useUser } from "./useUser"
 
 export default function Login() {
-    const { login } = useUser()
+    const { login, userStatus } = useUser()
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
 

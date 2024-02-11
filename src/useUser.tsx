@@ -25,7 +25,7 @@ export const UserProvider = ({ children }) => {
     const [user, setUserRaw] = useLocalStorage<User | null>({ key: "user", defaultValue: null })
     const [userStatus, setUserStatus] = useLocalStorage({ key: "userStatus", defaultValue: UserStatus.NoUser })
     const [profileStatus, setProfileStatus] = useLocalStorage({ key: "profileStatus", defaultValue: ProfileStatus.NoProfile })
-    const navigate = useNavigate()
+    // const navigate = useNavigate()
 
     const setUser = (user: User | null) => {
         if (!user) {
@@ -118,7 +118,7 @@ export const UserProvider = ({ children }) => {
         }
         setAuthUser(authCred.user)
         setUserStatus(UserStatus.SignedIn)
-        navigate("/profile")
+        // navigate("/profile")
     }
 
     const logout = () => {
@@ -127,7 +127,7 @@ export const UserProvider = ({ children }) => {
                 setUser(null)
                 setAuthUser(null)
                 console.log("Signed out successfully")
-                navigate("/", { replace: true })
+                // navigate("/", { replace: true })
             })
             .catch(error => { console.log("Error signing out: ", error) })
     }
