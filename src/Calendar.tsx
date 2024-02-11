@@ -1,9 +1,9 @@
-import { z } from "zod"
 import { ReactElement } from "react"
 import { Grid, Tooltip } from "@mantine/core"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
-import { User, Entry } from "./user"
+import { User, Entry, UserStatus, ProfileStatus } from "./user"
+import { useUser } from "./useUser"
 import "./static/style.css"
 
 const generateEntries = (user: User): Map<Date, Entry | null> => {
@@ -25,8 +25,9 @@ const renderEntry = (date: Date, entry: Entry | null): ReactElement => {
     )
 }
 
-export function Calendar({ user }: { user: User | null }) {
-    if (user !== null) {
+export function Calendar() {
+    const { user, userStatus, profileStatus } = useUser()
+    if (user !== null && userStatus === UserStatus.SignedIn && profileStatus === ProfileStatus.CompleteProfile) {
         const entries = generateEntries(user)
         console.log(entries)
         const toRender: Array<ReactElement> = []

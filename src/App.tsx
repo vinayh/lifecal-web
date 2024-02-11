@@ -2,53 +2,17 @@ import "@mantine/core/styles.css"
 import { MantineProvider } from "@mantine/core"
 import { Notifications } from "@mantine/notifications"
 import { theme } from "./theme"
-import { useState, useEffect } from "react"
 import { Route, createBrowserRouter, useRoutes, Navigate, createRoutesFromElements, RouterProvider } from "react-router-dom"
-import { useAuthState, useSignOut } from "react-firebase-hooks/auth"
 
-import { auth, User, UserZ, InitialUserZ, LoadStatus, UserStatus, fetchUser, signOut } from "./user"
+import { UserStatus, ProfileStatus } from "./user"
 import Login from "./Login"
 import { Calendar } from "./Calendar"
 import { UserProfile } from "./UserProfile"
+import { UserProvider, useUser } from "./useUser"
 // import PrivateRoute from "./PrivateRoute"
 
 export default function App() {
-  const [authUser, authLoading, authError] = useAuthState(auth)
-  const [user, setUser] = useState<User | null>(null)
-  const [userStatus, setUserStatus] = useState<UserStatus>(UserStatus.NoUser)
-  // const [loadUserError, setLoadUserError] = useState<string | undefined>()
-
-  // useEffect(() => {
-  //   if (userStatus === UserStatus.NoUser && authUser != null && authError == null) {
-  //     setUserStatus(UserStatus.SignedIn)
-  //   } else if (authUser == null) {
-  //     setUserStatus(UserStatus.NoUser)
-  //   }
-  //   if (userStatus === UserStatus.SignedIn) {
-  //     setUserStatus(UserStatus.LoadingProfile)
-  //     fetchUser(authUser)
-  //       .then(res => {
-  //         if (res.status === LoadStatus.Success) {
-  //           console.log(res.user)
-  //           const result = UserZ.safeParse(res.user)
-  //           if (result.success) {
-  //             setUser(result.data)
-  //             setUserStatus(UserStatus.CompleteProfile)
-  //           } else {
-  //             const initResult = InitialUserZ.safeParse(res.user)
-  //             if (initResult.success) {
-  //               setUser(initResult.data as User)
-  //               setUserStatus(UserStatus.IncompleteProfile)
-  //             } else {
-  //               setUserStatus(UserStatus.InvalidProfile)
-  //             }
-  //           }
-  //         } else {
-  //           setUserStatus(UserStatus.ProfileLoadError)
-  //         }
-  //       })
-  //   }
-  // }, [authUser, userStatus])
+  const { userStatus, profileStatus, logout } = useUser()
 
   // const calendarElement = <PrivateRoute authUser={authUser} authLoading={authLoading} user={user} setUser={setUser}>
   //   <Calendar user={user} />
@@ -58,9 +22,9 @@ export default function App() {
   //   <UserProfile user={user} authUser={authUser} />
   // </PrivateRoute>
 
-  const InitialProfile = ({ children = <UserProfile user={user} authUser={authUser} /> } = {}) => {
+  const InitialProfile = ({ children = <UserProfile /> } = {}) => {
     console.log("InitialProfile -", userStatus)
-    if ([UserStatus.CompleteProfile, UserStatus.IncompleteProfile, UserStatus.LoadingProfile, UserStatus.SignedIn].includes(userStatus)) {
+    if (userStatus === UserStatus.SignedIn && [ProfileStatus.CompleteProfile, ProfileStatus.IncompleteProfile, ProfileStatus.LoadingProfile].includes(profileStatus)) {
       console.log("InitialProfile - loading children")
       return children
     }
@@ -68,21 +32,21 @@ export default function App() {
       return <Navigate to="/login" />
     }
   }
-  
-  const CompleteProfile = ({ children = <Calendar user={user} /> } = {}) => {
+
+  const CompleteProfile = ({ children = <Calendar /> } = {}) => {
     console.log("CompleteProfile -", userStatus)
-    if (userStatus === UserStatus.CompleteProfile) {
+    if (profileStatus === ProfileStatus.CompleteProfile) {
       console.log("CompleteProfile - loading children")
       return children
     }
     else { return InitialProfile() }
   }
 
-  const PublicOnlyProfile = ({ children = <Login userStatus={userStatus} setUserStatus={setUserStatus} /> } = {}) => {
+  const PublicOnlyProfile = ({ children = <Login /> } = {}) => {
     console.log("PublicOnlyProfile -", userStatus)
-    if (userStatus === UserStatus.IncompleteProfile) {
+    if (profileStatus === ProfileStatus.IncompleteProfile) {
       return <Navigate to="/profile" />
-    } else if (userStatus == UserStatus.CompleteProfile) {
+    } else if (profileStatus == ProfileStatus.CompleteProfile) {
       return <Navigate to="/calendar" />
       // TODO: Address other UserStatus cases such as SignedIn or 
     } else {
@@ -93,20 +57,22 @@ export default function App() {
 
   const router = createBrowserRouter(createRoutesFromElements(
     <>
-      <Route index={true} element={<CompleteProfile><UserProfile user={user} authUser={authUser} /></CompleteProfile>} />
-      <Route path="calendar" element={<CompleteProfile><Calendar user={user} /></CompleteProfile>} />
-      <Route path="profile" element={<InitialProfile><UserProfile user={user} authUser={authUser} /></InitialProfile>} />
-      <Route path="login" element={<PublicOnlyProfile><Login userStatus={userStatus} setUserStatus={setUserStatus} /></PublicOnlyProfile>} />
+      <Route index={true} element={<CompleteProfile><UserProfile /></CompleteProfile>} />
+      <Route path="calendar" element={<CompleteProfile><Calendar /></CompleteProfile>} />
+      <Route path="profile" element={<InitialProfile><UserProfile /></InitialProfile>} />
+      <Route path="login" element={<PublicOnlyProfile><Login /></PublicOnlyProfile>} />
     </>
   ))
 
   return <MantineProvider theme={theme}>
-    <button name="signOut" onClick={signOut}/>
-    User: {userStatus.toString()}
-    <Notifications />
-    {(userStatus === UserStatus.LoadingProfile || userStatus === UserStatus.SigningIn)
-    ? <p>Loading...</p>
-    : <RouterProvider router={router} />
+    <UserProvider>
+      <button name="logoutButton" onClick={logout}>Log out</button>
+      User: {userStatus.toString()}
+      <Notifications />
+      {(profileStatus === ProfileStatus.LoadingProfile || userStatus === UserStatus.SigningIn)
+        ? <p>Loading...</p>
+        : <RouterProvider router={router} />
     /*{ {(authUser !== null || authLoading == true) ? element : <Login />} */}
+    </UserProvider>
   </MantineProvider>;
 }

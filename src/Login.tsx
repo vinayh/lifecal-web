@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { Dispatch, SetStateAction, useState } from "react"
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
 import {
@@ -17,9 +16,11 @@ import {
     Stack,
 } from '@mantine/core';
 
-import { authProvider, authEmailPassword, UserStatus, LoginFormEntryZ } from "./user"
+import { UserStatus } from "./user"
+import { useUser } from "./useUser"
 
-export default function Login({ userStatus, setUserStatus }: { userStatus: UserStatus, setUserStatus: Dispatch<SetStateAction<UserStatus>> }) {
+export default function Login() {
+    const { login } = useUser()
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
 
@@ -31,19 +32,6 @@ export default function Login({ userStatus, setUserStatus }: { userStatus: UserS
         },
     });
 
-    const signIn = async (provider: string, values: z.infer<typeof LoginFormEntryZ> | null = null) => {
-        const signInAsync = (() => {
-            if (provider === "google") { return authProvider("google") }
-            else if (provider === "github") { return authProvider("github") }
-            else if (provider === "email" && values !== null) { return authEmailPassword(values) }
-            else { throw new Error("Invalid sign in method") }
-        })()
-        setUserStatus(UserStatus.SigningIn)
-        signInAsync
-            .then(_ => setUserStatus(UserStatus.SignedIn))
-            .catch(_ => setUserStatus(UserStatus.SignInError))
-    }
-
     return (
         <Center pt={25}>
             <Box>
@@ -53,13 +41,13 @@ export default function Login({ userStatus, setUserStatus }: { userStatus: UserS
                     </Text>
 
                     <Group grow mb="md" mt="md">
-                        <GoogleButton radius="md" onClick={() => signIn("google")}>Google</GoogleButton>
-                        <GithubButton radius="md" onClick={() => signIn("github")}>GitHub</GithubButton>
+                        <GoogleButton radius="md" onClick={() => login("google", undefined)}>Google</GoogleButton>
+                        <GithubButton radius="md" onClick={() => login("github", undefined)}>GitHub</GithubButton>
                     </Group>
 
                     <Divider label="Or continue with email" labelPosition="center" my="lg" />
 
-                    <form onSubmit={form.onSubmit(values => signIn("email", values))}>
+                    <form onSubmit={form.onSubmit(values => login("emailPassword", values))}>
                         <Stack>
                             <TextInput
                                 required

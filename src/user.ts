@@ -21,16 +21,24 @@ export enum LoadStatus {
 }
 
 export enum UserStatus {
-    CompleteProfile = "Completed profile",
-    IncompleteProfile = "Incomplete profile",
-    InvalidProfile = "Invalid profile",
-    LoadingProfile = "Loading profile",
-    ProfileLoadError = "Error loading profile",
     SignedIn = "User signed in",
     SignInError = "Error signing user in",
     SigningIn = "Signing in",
     NoUser = "No user session"
 }
+
+export enum ProfileStatus {
+    CompleteProfile = "Completed profile",
+    IncompleteProfile = "Incomplete profile",
+    UpdatingProfile = "Updating profile",
+    InvalidProfile = "Invalid profile",
+    LoadingProfile = "Loading profile",
+    ProfileLoadError = "Error loading profile",
+    NoProfile = "No profile loaded"
+}
+
+const authMethods = ["emailPassword", "github", "google"] as const
+export type AuthMethod = typeof authMethods[number]
 
 export const auth = getAuth(app)
 
