@@ -18,37 +18,37 @@ export default function App() {
   const [userStatus, setUserStatus] = useState<UserStatus>(UserStatus.NoUser)
   // const [loadUserError, setLoadUserError] = useState<string | undefined>()
 
-  useEffect(() => {
-    if (userStatus === UserStatus.NoUser && authUser != null && authError == null) {
-      setUserStatus(UserStatus.SignedIn)
-    } else if (authUser == null) {
-      setUserStatus(UserStatus.NoUser)
-    }
-    if (userStatus === UserStatus.SignedIn) {
-      setUserStatus(UserStatus.LoadingProfile)
-      fetchUser(authUser)
-        .then(res => {
-          if (res.status === LoadStatus.Success) {
-            console.log(res.user)
-            const result = UserZ.safeParse(res.user)
-            if (result.success) {
-              setUser(result.data)
-              setUserStatus(UserStatus.CompleteProfile)
-            } else {
-              const initResult = InitialUserZ.safeParse(res.user)
-              if (initResult.success) {
-                setUser(initResult.data as User)
-                setUserStatus(UserStatus.IncompleteProfile)
-              } else {
-                setUserStatus(UserStatus.InvalidProfile)
-              }
-            }
-          } else {
-            setUserStatus(UserStatus.ProfileLoadError)
-          }
-        })
-    }
-  }, [authUser, userStatus])
+  // useEffect(() => {
+  //   if (userStatus === UserStatus.NoUser && authUser != null && authError == null) {
+  //     setUserStatus(UserStatus.SignedIn)
+  //   } else if (authUser == null) {
+  //     setUserStatus(UserStatus.NoUser)
+  //   }
+  //   if (userStatus === UserStatus.SignedIn) {
+  //     setUserStatus(UserStatus.LoadingProfile)
+  //     fetchUser(authUser)
+  //       .then(res => {
+  //         if (res.status === LoadStatus.Success) {
+  //           console.log(res.user)
+  //           const result = UserZ.safeParse(res.user)
+  //           if (result.success) {
+  //             setUser(result.data)
+  //             setUserStatus(UserStatus.CompleteProfile)
+  //           } else {
+  //             const initResult = InitialUserZ.safeParse(res.user)
+  //             if (initResult.success) {
+  //               setUser(initResult.data as User)
+  //               setUserStatus(UserStatus.IncompleteProfile)
+  //             } else {
+  //               setUserStatus(UserStatus.InvalidProfile)
+  //             }
+  //           }
+  //         } else {
+  //           setUserStatus(UserStatus.ProfileLoadError)
+  //         }
+  //       })
+  //   }
+  // }, [authUser, userStatus])
 
   // const calendarElement = <PrivateRoute authUser={authUser} authLoading={authLoading} user={user} setUser={setUser}>
   //   <Calendar user={user} />
