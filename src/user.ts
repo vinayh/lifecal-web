@@ -15,14 +15,14 @@ const providers: { [index: string]: AuthProvider } = {
 }
 
 export enum LoadStatus {
-    Loading,
-    Success,
-    Error
+    Loading = "Loading",
+    Success = "Success",
+    Error = "Error"
 }
 
 export enum UserStatus {
     SignedIn = "User signed in",
-    SignInError = "Error signing user in",
+    // SignInError = "Error signing user in",
     SigningIn = "Signing in",
     NoUser = "No user session"
 }

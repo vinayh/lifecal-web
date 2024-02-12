@@ -1,6 +1,7 @@
 import { z } from "zod"
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
+import usePromise from "react-promise-suspense"
 import {
     TextInput,
     PasswordInput,
@@ -17,10 +18,10 @@ import {
 } from '@mantine/core';
 
 import { UserStatus } from "./user"
-import { useUser } from "./useUser"
+import { useAwaitedUser } from "./useUser"
 
 export default function Login() {
-    const { login, userStatus } = useUser()
+    const { login, userStatus } = usePromise(useAwaitedUser, [])
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
 
@@ -30,7 +31,11 @@ export default function Login() {
             email: val => valEmailZod(val) ? null : "Invalid email",
             password: val => (val.length >= 8 ? null : "Password should include at least 8 characters"),
         },
-    });
+    })
+
+    const loginAction = () => {
+        
+    }
 
     return (
         <Center pt={25}>

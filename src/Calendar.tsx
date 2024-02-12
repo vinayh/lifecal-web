@@ -3,8 +3,9 @@ import { Grid, Tooltip } from "@mantine/core"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
 import { User, Entry, UserStatus, ProfileStatus } from "./user"
-import { useUser } from "./useUser"
+import { useAwaitedUser, useUser } from "./useUser"
 import "./static/style.css"
+import usePromise from "react-promise-suspense"
 
 const generateEntries = (user: User): Map<Date, Entry | null> => {
     const startDate = isMonday(user.birth) ? user.birth : previousMonday(user.birth)
@@ -26,7 +27,7 @@ const renderEntry = (date: Date, entry: Entry | null): ReactElement => {
 }
 
 export function Calendar() {
-    const { user, userStatus, profileStatus } = useUser()
+    const { user, userStatus, profileStatus } = usePromise(useAwaitedUser, [])
     if (user !== null && userStatus === UserStatus.SignedIn && profileStatus === ProfileStatus.CompleteProfile) {
         const entries = generateEntries(user)
         console.log(entries)

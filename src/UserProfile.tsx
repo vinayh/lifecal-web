@@ -3,13 +3,14 @@ import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { TextInput, Button, Group, Text, Paper, Center, Container } from "@mantine/core";
 import { LoadStatus, ProfileFormEntry, ProfileStatus } from "./user";
-import { useUser } from "./useUser";
+import { useAwaitedUser } from "./useUser";
+import usePromise from "react-promise-suspense";
 
 export function UserProfile() {
     // const [errorMessage, setErrorMessage] = useState<string | undefined>()
     const [updateStatus, setUpdateStatus] = useState<LoadStatus | null>(null);
     const [updateMessage, setUpdateMessage] = useState<string | null>(null);
-    const { user, profileStatus, updateProfile } = useUser()
+    const { user, profileStatus, updateProfile } = usePromise(useAwaitedUser, [])
 
     if (user !== null && (profileStatus == ProfileStatus.CompleteProfile || profileStatus == ProfileStatus.IncompleteProfile)) {
         const { name, birth, expYears, email } = user
