@@ -1,51 +1,56 @@
 import { z } from "zod"
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { useLocalStorage } from "@mantine/hooks"
+import { useLocalStorage } from "@uidotdev/usehooks"
 import { signOut, signInWithPopup, GoogleAuthProvider, GithubAuthProvider, User as AuthUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, UserCredential } from "firebase/auth"
 
-import { auth, LoadStatus, AuthMethod, AuthStatus, User, UserZ, InitialUserZ, ProfileFormEntry, ProfileStatus } from "./user"
+import { auth, LoadStatus, AuthMethod, AuthStatus, UserProfile, UserProfileZ, InitialUserZ, ProfileFormEntry, ProfileStatus } from "./user"
 
 export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
 const BACKEND_URL = "https://us-central1-lifecal-backend.cloudfunctions.net"
 
 interface UserContextType {
-    user: User | null
-    authUser: AuthUser | null
+    userProfile: UserProfile | null
+    userAuth: AuthUser | null
     userStatus: AuthStatus
     profileStatus: ProfileStatus
     login: (authMethod: AuthMethod, data: { email: string, password: string } | undefined) => void
     logout: () => void
     updateProfile: (formEntry: ProfileFormEntry) => Promise<{ status: LoadStatus, message: string }>
-    loadProfile: () => Promise<User | null>
+    loadProfile: () => Promise<UserProfile | null>
     profileIsStale: () => boolean
 }
 
 const UserContext = createContext<UserContextType | null>(null)
 
 export const UserProvider = ({ children }) => {
-    const [userAuth, setUserAuthHelper] = useLocalStorage<AuthUser | null>({ key: "userAuth", defaultValue: null })
-    const [userProfile, setUserProfileHelper] = useLocalStorage<User | null>({ key: "userProfile", defaultValue: null })
-    const [authStatus, setAuthStatus] = useLocalStorage<AuthStatus>({ key: "authStatus", defaultValue: AuthStatus.NoUser })
-    const [profileStatus, setProfileStatus] = useLocalStorage<ProfileStatus>({ key: "profileStatus", defaultValue: ProfileStatus.NoProfile })
-    const [userLastUpdated, setUserLastUpdated] = useLocalStorage<number | null>({ key: "userLastUpdated", defaultValue: null })
+    const [userAuth, setUserAuthHelper] = useState<AuthUser | null>(null)
+    const [userProfile, setUserProfileHelper] = useLocalStorage<UserProfile | null>("userProfile", null)
+    const [authStatus, setAuthStatus] = useState<AuthStatus>(AuthStatus.NoUser)
+    const [profileStatus, setProfileStatus] = useState<ProfileStatus>(ProfileStatus.NoProfile)
+    const [userLastUpdated, setUserLastUpdated] = useLocalStorage<number | null>("userLastUpdated", null)
     const navigate = useNavigate()
 
-    const setUserProfile = (user: User | null) => {
-        if (!user) {
+    const setUserProfile = (profile: UserProfile | null) => {
+        if (!profile) {
+            console.log("Setting null profile")
             setUserProfileHelper(null)
             setProfileStatus(ProfileStatus.NoProfile)
         } else {
-            const result = UserZ.safeParse(user)
+            const result = UserProfileZ.safeParse(profile)
             if (result.success) {
+                console.log("Setting complete profile to: " + JSON.stringify(result.data))
                 setUserProfileHelper(result.data)
                 setProfileStatus(ProfileStatus.CompleteProfile)
+                console.log("userProfile: " + JSON.stringify(userProfile))
             } else {
-                const initResult = InitialUserZ.safeParse(user)
+                const initResult = InitialUserZ.safeParse(profile)
                 if (initResult.success) {
-                    setUserProfileHelper(initResult.data as User)
+                    console.log("Setting initial incomplete profile")
+                    setUserProfileHelper(initResult.data as UserProfile)
                     setProfileStatus(ProfileStatus.IncompleteProfile)
                 } else {
+                    console.log("Setting invalid/null profile")
                     setUserProfileHelper(null)
                     setProfileStatus(ProfileStatus.InvalidProfile)
                 }
@@ -69,7 +74,7 @@ export const UserProvider = ({ children }) => {
         setProfileStatus(ProfileStatus.UpdatingProfile)
 
         const { name, birth, expYears, email } = formEntry
-        console.log(new Date(birth))
+        console.log(`Updating profile with birth: ${birth}, userAuth: ${userAuth}, profileStatus: ${profileStatus}`)
         if (userAuth !== null && (profileStatus == ProfileStatus.CompleteProfile || profileStatus == ProfileStatus.IncompleteProfile)) {
             return userAuth.getIdToken()
                 .then((idToken: string) => fetch(`${BACKEND_URL}/updateUserProfile?uid=${userAuth.uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}&email=${email}`))
@@ -129,59 +134,57 @@ export const UserProvider = ({ children }) => {
             .catch(error => { console.log("Error signing out: ", error) })
     }
 
-    const fetchProfile = async (authUser: AuthUser | null | undefined): Promise<{ status: LoadStatus, message: string } | { status: LoadStatus, user: User }> => {
-        if (!authUser) {
-            return Promise.reject({ status: LoadStatus.Error, message: "No user session" })
-        }
-        console.log(`authUser: ${authUser}`)
-        return authUser.getIdToken(false)
-            .then(idToken => fetch(`${BACKEND_URL}/getUser?uid=${authUser.uid}&idToken=${idToken}`))
-            .then(res => {
-                if (!res.ok) {
-                    return res.text().then(text => { throw new Error("Server error, response: " + text) })
-                }
-                return res.json()
-                    .then(user => {
-                        if (user.created) { user.created = new Date(user.created) }
-                        if (user.birth) { user.birth = new Date(user.birth) }
-                        return { status: LoadStatus.Success, user: user as User }
-                    })
-            })
-            .catch(error => { return Promise.reject({ status: LoadStatus.Error, message: "Error parsing user: " + error.message }) })
-    }
-
-    const loadProfile = async (userToLoad: AuthUser | null = userAuth): Promise<User | null> => {
+    const loadProfile = async (userToLoad: AuthUser | null = userAuth): Promise<UserProfile | null> => {
         if (profileStatus === ProfileStatus.LoadingProfile || profileStatus === ProfileStatus.InvalidProfile || !userToLoad || !profileIsStale) {
             console.log("Not loading profile due to currently loading, invalid profile, or existing updated user data")
             return Promise.resolve(null)
         }
         setProfileStatus(ProfileStatus.LoadingProfile)
-        console.log(`Loading user profile... userToUpdate is null? ${!userToLoad}, user is null? ${!userProfile}, last updated is null? ${!userLastUpdated}, userToLoad: ${userToLoad}`)
+        console.log(`Loading user profile. --- userToUpdate is null? ${!userToLoad}, user is null? ${!userProfile}, last updated is null? ${!userLastUpdated}, userToLoad: ${userToLoad}`)
         const res = await userToLoad.getIdToken(true)
             .then(idToken => fetch(`${BACKEND_URL}/getUser?uid=${userToLoad.uid}&idToken=${idToken}`))
         if (!res.ok) {
+            setUserProfile(null)
             return res.text()
                 .then(text => { return Promise.reject("Server error, response: " + text) })
                 .catch(error => { return Promise.reject("Error parsing server error response: " + error.message) })
         } else {
             return res.json()
-                .then(user => {
-                    if (user.created) { user.created = new Date(user.created) }
-                    if (user.birth) { user.birth = new Date(user.birth) }
-                    setUserProfile(user)
+                .then(profile => {
+                    if (profile.created) { profile.created = new Date(profile.created) }
+                    if (profile.birth) { profile.birth = new Date(profile.birth) }
+                    console.log("Fetched profile:" + profile.created + profile.birth)
+                    setUserProfile(profile)
                     setUserLastUpdated(Date.now())
-                    console.log("Updated user data")
-                    return user
+                    console.log(`Updated profile! --- userToUpdate is null? ${!userToLoad}, user is null? ${!userProfile}, last updated is null? ${!userLastUpdated}, userToLoad: ${userToLoad}`)
+                    return profile
                 })
-                .catch(error => { return Promise.reject("Error parsing user: " + error.message) })
+                .catch(error => {
+                    setUserProfile(null)
+                    return Promise.reject("Error parsing user: " + error.message)
+                })
         }
     }
 
-    const profileIsStale = () => { return (!userProfile || !userLastUpdated || (Date.now() - userLastUpdated) > 120000) }
+    const profileIsStale = () => { return (!userProfile || !userLastUpdated || !userAuth || (Date.now() - userLastUpdated) > 120000) }
 
-    useEffect(() => auth.onAuthStateChanged(newAuthUser => loadProfile(newAuthUser)), [])
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged(async newUserAuth => {
+            // TODO: This fn is called when Firebase auth gets its auth cred stored in local storage and finishes getting/refreshing the auth user obj
+            // Should add some sort of callback/promise so `useAwaitedUser` waits until this is loaded on page refresh
 
-    const value = useMemo(() => ({ user: userProfile, authUser: userAuth, userStatus: authStatus, profileStatus, login, logout, updateProfile, loadProfile: loadProfile, profileIsStale: profileIsStale }), [userProfile])
+            // setAuthStatus(AuthStatus.SigningIn)
+            console.log(`Auth state change, newUserAuth: ${JSON.stringify(newUserAuth)}`)
+            setUserAuth(newUserAuth)
+            if (!userProfile || !newUserAuth || userProfile.uid !== newUserAuth.uid) {
+                await loadProfile(newUserAuth)
+            }
+            // setAuthStatus(AuthStatus.SignedIn)
+            return () => unsubscribe()
+        })
+    }, [])
+
+    const value = useMemo(() => ({ userProfile: userProfile, userAuth: userAuth, userStatus: authStatus, profileStatus, login, logout, updateProfile, loadProfile: loadProfile, profileIsStale: profileIsStale }), [userProfile])
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
 
@@ -193,10 +196,10 @@ export const useUser = () => {
 
 export const useAwaitedUser = async (): Promise<UserContextType> => {
     const userContext = useContext(UserContext)
-    if (!userContext) { throw new Error("No AuthContext provider found") }
-    if (userContext.authUser && userContext.profileIsStale()) {
-        console.log("Awaiting user...")
-        await userContext.loadProfile()
-    }
-    return Promise.resolve(userContext)
+    if (!userContext) { return Promise.reject("No AuthContext provider found") }
+    if (!userContext.userAuth) { return Promise.reject("No user session") }
+    if (!userContext.profileIsStale()) { return Promise.resolve(userContext) }
+    console.log("Awaiting user...")
+    await userContext.loadProfile()
+    return userContext
 }

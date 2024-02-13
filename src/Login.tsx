@@ -18,10 +18,10 @@ import {
 } from '@mantine/core';
 
 import { AuthStatus } from "./user"
-import { useAwaitedUser } from "./useUser"
+import { useUser } from "./useUser"
 
 export default function Login() {
-    const { login, userStatus } = usePromise(useAwaitedUser, [])
+    const { login, userStatus } = useUser()
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
 
@@ -32,10 +32,6 @@ export default function Login() {
             password: val => (val.length >= 8 ? null : "Password should include at least 8 characters"),
         },
     })
-
-    const loginAction = () => {
-        
-    }
 
     return (
         <Center pt={25}>
