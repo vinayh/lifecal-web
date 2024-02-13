@@ -2,7 +2,7 @@ import "@mantine/core/styles.css"
 import { Notifications } from "@mantine/notifications"
 import { Route, createBrowserRouter, useRoutes, Navigate, createRoutesFromElements, RouterProvider, defer } from "react-router-dom"
 
-import { UserStatus, ProfileStatus } from "./user"
+import { AuthStatus, ProfileStatus } from "./user"
 import Login from "./Login"
 import Home from "./Home"
 

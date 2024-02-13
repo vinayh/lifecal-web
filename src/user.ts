@@ -20,7 +20,7 @@ export enum LoadStatus {
     Error = "Error"
 }
 
-export enum UserStatus {
+export enum AuthStatus {
     SignedIn = "User signed in",
     // SignInError = "Error signing user in",
     SigningIn = "Signing in",

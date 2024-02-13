@@ -12,6 +12,7 @@ export const PrivateLayout = () => {
     <div>
       <nav>
         <Link to="/profile">Profile</Link>
+        <br></br>
         <Link to="/calendar">Calendar</Link>
       </nav>
       <Outlet />

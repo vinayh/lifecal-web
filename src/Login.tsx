@@ -17,7 +17,7 @@ import {
     Stack,
 } from '@mantine/core';
 
-import { UserStatus } from "./user"
+import { AuthStatus } from "./user"
 import { useAwaitedUser } from "./useUser"
 
 export default function Login() {
@@ -72,7 +72,7 @@ export default function Login() {
                         </Stack>
 
                         <Group justify="flex-end" mt="md">
-                            <LoadingOverlay visible={userStatus === UserStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+                            <LoadingOverlay visible={userStatus === AuthStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
                             <Button type="submit" radius="md">Login | Register</Button>
                         </Group>
                     </form>

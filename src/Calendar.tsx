@@ -2,7 +2,7 @@ import { ReactElement } from "react"
 import { Grid, Tooltip } from "@mantine/core"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
-import { User, Entry, UserStatus, ProfileStatus } from "./user"
+import { User, Entry, AuthStatus, ProfileStatus } from "./user"
 import { useAwaitedUser, useUser } from "./useUser"
 import "./static/style.css"
 import usePromise from "react-promise-suspense"
@@ -28,7 +28,7 @@ const renderEntry = (date: Date, entry: Entry | null): ReactElement => {
 
 export function Calendar() {
     const { user, userStatus, profileStatus } = usePromise(useAwaitedUser, [])
-    if (user !== null && userStatus === UserStatus.SignedIn && profileStatus === ProfileStatus.CompleteProfile) {
+    if (user !== null && userStatus === AuthStatus.SignedIn && profileStatus === ProfileStatus.CompleteProfile) {
         const entries = generateEntries(user)
         console.log(entries)
         const toRender: Array<ReactElement> = []

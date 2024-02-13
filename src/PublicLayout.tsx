@@ -12,9 +12,10 @@ export const PublicLayout = () => {
     <div>
       <nav>
         <Link to="/">Home</Link>
+        <br></br>
         <Link to="/login">Login</Link>
       </nav>
       <Outlet />
     </div>
   )
-};
+}

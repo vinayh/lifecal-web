@@ -5,7 +5,7 @@ import { useAwaitedUser, useUser } from "./useUser"
 
 export const UserLayout = ({ children }) => {
     // const outlet = useOutlet()
-    const { updateUser, userStatus, profileStatus, userHasInitialProfile } = useUser()
+    const { loadProfile: updateUser, userStatus, profileStatus, userHasInitialProfile } = useUser()
     // const { userPromise } = useLoaderData()
 
     // const getUserData = () =>
