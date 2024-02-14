@@ -14,7 +14,7 @@ export const UserProvider = ({ children }) => {
     const [loading, setLoading] = useState(false)
     const [userAuth, setUserAuthHelper] = useState<AuthUser | null>(null)
     const [userProfile, setUserProfileHelper] = useLocalStorage<UserProfile | null>("userProfile", null)
-    const authStatus = useRef<AuthStatus>(AuthStatus.NoUser)
+    const [authStatus, setAuthStatus] = useState<AuthStatus>(AuthStatus.NoUser)
     const profileStatus = useRef<ProfileStatus>(ProfileStatus.NoProfile)
     const [userLastUpdated, setUserLastUpdated] = useLocalStorage<number | null>("userLastUpdated", null)
     const navigate = useNavigate()
@@ -46,15 +46,16 @@ export const UserProvider = ({ children }) => {
         }
     }
 
-    const setUserAuth = (authUser: AuthUser | null) => {
-        if (!authUser) {
+    const setUserAuth = (auth: AuthUser | null) => {
+        if (!auth) {
             setUserAuthHelper(null)
             setUserProfile(null)
-            authStatus.current = AuthStatus.NoUser
+            setAuthStatus(AuthStatus.NoUser)
+            console.log("Set authStatus to no user")
         } else {
-            setUserAuthHelper(authUser)
-            authStatus.current = AuthStatus.SignedIn
-            console.log(`Not loading new profile, existing auth: ${JSON.stringify(authUser)}\n\n authStatus: ${authStatus}\n\n profile: ${JSON.stringify(userProfile)}`)
+            setUserAuthHelper(auth)
+            setAuthStatus(AuthStatus.SignedIn)
+            console.log(`Not loading new profile, existing auth: ${JSON.stringify(auth)}\n\n authStatus: ${authStatus}\n\n profile: ${JSON.stringify(userProfile)}`)
         }
     }
 
@@ -99,7 +100,7 @@ export const UserProvider = ({ children }) => {
     }
 
     const login = async (authMethod: AuthMethod, data: { email: string, password: string } | undefined) => {
-        authStatus.current = AuthStatus.SigningIn
+        // setAuthStatus(AuthStatus.SigningIn)
         var authCred: UserCredential
         try {
             if (authMethod === "emailPassword" && data) {
@@ -215,14 +216,14 @@ export const UserProvider = ({ children }) => {
         })
     }
 
-    const value = useMemo(() => ({ userProfile, userAuth, authStatus, profileStatus, loading, login, logout, updateProfile, loadProfile, profileIsStale, userProfilePromise: userProfilePromise }), [userProfile])
+    const value = useMemo(() => ({ userProfile, userAuth, authStatus, profileStatus, loading, login, logout, updateProfile, loadProfile, profileIsStale, userProfilePromise }), [userProfile])
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
 
 interface UserContextType {
     userProfile: UserProfile | null
     userAuth: AuthUser | null
-    authStatus: React.MutableRefObject<AuthStatus>
+    authStatus: AuthStatus
     profileStatus: React.MutableRefObject<ProfileStatus>
     loading: boolean
     login: (authMethod: AuthMethod, data: { email: string, password: string } | undefined) => void

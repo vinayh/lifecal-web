@@ -69,6 +69,7 @@ export default function Login() {
 
                         <Group justify="flex-end" mt="md">
                             <LoadingOverlay visible={authStatus === AuthStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+                            {/* TODO: Change logging in status from AuthStatus.SigningIn as that no longer works, try using something based on login fn */}
                             <Button type="submit" radius="md">Login | Register</Button>
                         </Group>
                     </form>

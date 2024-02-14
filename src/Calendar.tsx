@@ -51,6 +51,6 @@ export function Calendar() {
         </>
     } else {
         console.log(userProfile, userAuth)
-        // return <p>{JSON.stringify(userProfile)} <br></br> Auth: {JSON.stringify(userAuth)} <br></br> authStatus: {authStatus.current}, Profile: {profileStatus.current}</p>
+        // return <p>{JSON.stringify(userProfile)} <br></br> Auth: {JSON.stringify(userAuth)} <br></br> authStatus: {authStatus}, Profile: {profileStatus.current}</p>
     }
 }

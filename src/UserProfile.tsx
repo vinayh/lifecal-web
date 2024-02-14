@@ -46,7 +46,7 @@ export function UserProfile() {
     });
 
     if (!userAuth || !userProfile) {
-        return <p>{JSON.stringify(userProfile)} <br></br> Auth: {JSON.stringify(userAuth)} <br></br> authStatus: {authStatus.current}, Profile: {profileStatus.current}</p>
+        return <p>{JSON.stringify(userProfile)} <br></br> Auth: {JSON.stringify(userAuth)} <br></br> authStatus: {authStatus}, Profile: {profileStatus.current}</p>
     }
 
 
