@@ -21,7 +21,7 @@ import { AuthStatus } from "./user"
 import { useUser } from "./useUser"
 
 export default function Login() {
-    const { login, userStatus } = useUser()
+    const { login, authStatus } = useUser()
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
 
@@ -68,7 +68,7 @@ export default function Login() {
                         </Stack>
 
                         <Group justify="flex-end" mt="md">
-                            <LoadingOverlay visible={userStatus === AuthStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+                            <LoadingOverlay visible={authStatus === AuthStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
                             <Button type="submit" radius="md">Login | Register</Button>
                         </Group>
                     </form>

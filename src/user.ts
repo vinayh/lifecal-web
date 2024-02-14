@@ -38,22 +38,22 @@ export const auth = getAuth(app)
 export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
 
 export const TagZ = z.object({
-    id: z.number(), created: z.date(), name: z.string(), color: z.string(),
+    id: z.number(), created: z.string().datetime(), name: z.string(), color: z.string(),
 });
 export type Tag = z.infer<typeof TagZ>
 
 
 export const EntryZ = z.object({
-    id: z.number(), created: z.date(), start: z.date(), note: z.string(), tags: z.array(TagZ),
+    id: z.number(), created: z.string().datetime(), start: z.string().datetime(), note: z.string(), tags: z.array(TagZ),
 });
 export type Entry = z.infer<typeof EntryZ>
 
 
 export const UserProfileZ = z.object({
-    uid: z.string(), created: z.coerce.date(), name: z.string(), birth: z.date(), expYears: z.number(), email: z.string().email(), entries: z.array(EntryZ), tags: z.array(TagZ),
+    uid: z.string(), created: z.string().datetime(), name: z.string(), birth: z.string().datetime(), expYears: z.number(), email: z.string().email(), entries: z.array(EntryZ), tags: z.array(TagZ),
 });
 export type UserProfile = z.infer<typeof UserProfileZ>
 
 export const InitialUserZ = UserProfileZ.partial({ name: true, birth: true, expYears: true, email: true })
 
-export type ProfileFormEntry = { name: string, birth: string | Date, expYears: string | number, email: string }
+export type ProfileFormEntry = { name: string, birth: Date, expYears: string, email: string }

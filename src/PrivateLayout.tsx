@@ -11,9 +11,9 @@ export const PrivateLayout = () => {
   return (
     <div>
       <nav>
-        <Link to="/profile">Profile</Link>
+        <Link to="/dashboard/profile">Profile</Link>
         <br></br>
-        <Link to="/calendar">Calendar</Link>
+        <Link to="/dashboard/calendar">Calendar</Link>
       </nav>
       <Outlet />
     </div>

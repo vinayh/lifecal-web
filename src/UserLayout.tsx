@@ -5,7 +5,7 @@ import { useAwaitedUser, useUser } from "./useUser"
 
 export const UserLayout = ({ children }) => {
     // const outlet = useOutlet()
-    const { loadProfile: updateUser, userStatus, profileStatus, userHasInitialProfile } = useUser()
+    const { userAuth, userProfile, loading } = useUser()
     // const { userPromise } = useLoaderData()
 
     // const getUserData = () =>
@@ -13,20 +13,21 @@ export const UserLayout = ({ children }) => {
     //         if (!userHasInitialProfile()) {
     //             reject()
     //         } else {
-    //             updateUser()
+    //             loadProfile()
     //                 .then(user => resolve(user))
     //             setTimeout(() => reject(), 1000)
     //         }
     //     })
 
-    const UserError = () => {
-        const error = useAsyncError()
-        return <div>Error loading user: {error.message}</div>
-    }
+    // const UserError = () => {
+    //     const error = useAsyncError()
+    //     return <div>Error loading user: {error.message}</div>
+    // }
 
-    return (
-        <Suspense fallback={<><Loader /><p>{userStatus}, {profileStatus}</p></>}>
-            {children}
-        </Suspense>
-    )
+    return (loading || !userAuth || !userProfile) ? <Loader /> : children
+    // (
+    //     <Suspense fallback={<><Loader /><p>{authStatus}, {profileStatus}</p></>}>
+    //         {children}
+    //     </Suspense>
+    // )
 }

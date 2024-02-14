@@ -1,20 +1,19 @@
+import { z } from "zod"
 import { SetStateAction, useState, Dispatch } from "react";
 import { useForm } from "@mantine/form";
 import { DateInput } from "@mantine/dates";
 import { TextInput, Button, Group, Text, Paper, Center, Container } from "@mantine/core";
 import { LoadStatus, ProfileFormEntry, ProfileStatus } from "./user";
-import { useAwaitedUser } from "./useUser";
+import { useAwaitedUser, useUser } from "./useUser";
 import usePromise from "react-promise-suspense";
 
 export function UserProfile() {
     // const [errorMessage, setErrorMessage] = useState<string | undefined>()
-    const [updateStatus, setUpdateStatus] = useState<LoadStatus | null>(null);
-    const [updateMessage, setUpdateMessage] = useState<string | null>(null);
-    const { userProfile, userAuth, profileStatus, updateProfile } = usePromise(useAwaitedUser, [])
-
-    if (profileStatus === ProfileStatus.NoProfile) {
-        return <p>No user session or no profile being loaded</p>
-    }
+    const [updateStatus, setUpdateStatus] = useState<LoadStatus | null>(null)
+    const [updateMessage, setUpdateMessage] = useState<string | null>(null)
+    
+    // const [{ updateProfile, profileStatus, authStatus }, userAuth, userProfile] = usePromise(useAwaitedUser, [])
+    const { updateProfile, profileStatus, authStatus, userAuth, userProfile } = useUser()
 
     const { name, birth, expYears, email } = userProfile
 
@@ -27,8 +26,9 @@ export function UserProfile() {
                 setUpdateStatus(res.status)
                 setUpdateMessage(res.message)
             })
+            .catch(error => { throw new Error("Profile update error: " + JSON.stringify(error)) })
     }
-
+    
     const form = useForm({
         initialValues: {
             email: email !== null ? email : "",
@@ -40,10 +40,15 @@ export function UserProfile() {
         validate: {
             email: value => /^\S+@\S+$/.test(value) ? null : "Invalid email",
             name: value => (value !== undefined && value.length >= 1) ? null : "Invalid name",
-            birth: value => (value instanceof Date || !isNaN(Date.parse(value))) ? null : "Invalid date of birth",
+            birth: value => (value instanceof Date || z.string().datetime().safeParse(value).success) ? null : "Invalid date of birth",
             expYears: value => ((typeof value === "number" || (/^-?\d+$/.test(value)) && parseInt(value) > 0)) ? null : "Invalid life expectancy"
         },
     });
+
+    if (!userAuth || !userProfile) {
+        return <p>{JSON.stringify(userProfile)} <br></br> Auth: {JSON.stringify(userAuth)} <br></br> authStatus: {authStatus.current}, Profile: {profileStatus.current}</p>
+    }
+
 
     return <>
         <p>{userProfile.uid}<br></br>{userAuth.uid}</p>

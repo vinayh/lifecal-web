@@ -8,12 +8,13 @@ import "./static/style.css"
 import usePromise from "react-promise-suspense"
 
 const generateEntries = (user: UserProfile): Map<Date, Entry | null> => {
-    const startDate = isMonday(user.birth) ? user.birth : previousMonday(user.birth)
+    const birth = new Date(user.birth)
+    const startDate = isMonday(birth) ? birth : previousMonday(birth)
     const endDate = addYears(startDate, user.expYears)
     const numWeeks = differenceInWeeks(endDate, startDate, { roundingMethod: "ceil" })
     const entryDatesArray = [...Array(numWeeks).keys()]
     const entryDates = new Map(entryDatesArray.map(wk => [addWeeks(startDate, wk), null]))
-    const entries: Map<Date, Entry | null> = user.entries.reduce((a, v) => ({ ...a, [v.start.getDate()]: v }), entryDates)
+    const entries: Map<Date, Entry | null> = user.entries.reduce((a, v) => ({ ...a, [new Date(v.start).getDate()]: v }), entryDates)
     return entries
 }
 
@@ -27,21 +28,26 @@ const renderEntry = (date: Date, entry: Entry | null): ReactElement => {
 }
 
 export function Calendar() {
-    const { userProfile: user, userStatus, profileStatus } = usePromise(useAwaitedUser, [])
-    if (user !== null && userStatus === AuthStatus.SignedIn && profileStatus === ProfileStatus.CompleteProfile) {
-        const entries = generateEntries(user)
+    const { profileStatus, authStatus, userAuth, userProfile } = useUser()
+    // const [{ profileStatus, authStatus }, userAuth, userProfile] = usePromise(useAwaitedUser, [])
+
+    if (userProfile && userAuth) {
+        const entries = generateEntries(userProfile)
         console.log(entries)
         const toRender: Array<ReactElement> = []
         entries.forEach((entry, date) => {
             toRender.push(renderEntry(date, entry))
         })
-    
+        console.log("Rendering calendar")
         return <>
-            <p>Date of birth: {user.birth.toDateString()}</p>
-            <p>{user.name}, {user.email}</p>
+            <p>Date of birth: {userProfile.birth}</p>
+            <p>{userProfile.name}, {userProfile.email}</p>
             <Grid>
                 {toRender}
             </Grid >
         </>
+    } else {
+        console.log(userProfile, userAuth)
+        // return <p>{JSON.stringify(userProfile)} <br></br> Auth: {JSON.stringify(userAuth)} <br></br> authStatus: {authStatus.current}, Profile: {profileStatus.current}</p>
     }
 }
