@@ -67,7 +67,7 @@ export const UserProvider = ({ children }) => {
             const newUserProfile = {
                 ...userProfile,
                 name: name,
-                birth: birth.toISOString(),
+                birth: (birth instanceof Date) ? birth.toISOString() : birth,
                 expYears: parseInt(expYears),
                 email: email,
                 entries: userProfile.entries,

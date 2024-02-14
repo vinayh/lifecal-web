@@ -56,4 +56,4 @@ export type UserProfile = z.infer<typeof UserProfileZ>
 
 export const InitialUserZ = UserProfileZ.partial({ name: true, birth: true, expYears: true, email: true })
 
-export type ProfileFormEntry = { name: string, birth: Date, expYears: string, email: string }
+export type ProfileFormEntry = { name: string, birth: string | Date, expYears: string, email: string }
