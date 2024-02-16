@@ -23,9 +23,7 @@ export enum AuthStatus {
 export enum ProfileStatus {
     CompleteProfile = "Completed profile",
     IncompleteProfile = "Incomplete profile",
-    UpdatingProfile = "Updating profile",
     InvalidProfile = "Invalid profile",
-    LoadingProfile = "Loading profile",
     ProfileLoadError = "Error loading profile",
     NoProfile = "No profile loaded"
 }

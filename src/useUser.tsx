@@ -10,13 +10,31 @@ import { auth, LoadStatus, AuthMethod, AuthStatus, UserProfile, UserProfileZ, In
 export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
 const BACKEND_URL = "https://us-central1-lifecal-backend.cloudfunctions.net"
 
+interface UserContextType {
+    userProfile: UserProfile | null
+    userAuth: AuthUser | null
+    authStatus: AuthStatus
+    profileStatus: React.MutableRefObject<ProfileStatus>
+    loadingProfile: boolean
+    loadingAuth: boolean
+    login: (authMethod: AuthMethod, data: { email: string, password: string } | undefined) => void
+    logout: () => void
+    updateProfile: (formEntry: ProfileFormEntry) => Promise<{ status: LoadStatus, message: string }>
+    loadProfile: () => Promise<UserProfile>
+    profileIsStale: () => boolean
+    // userProfilePromise: () => Promise<[AuthUser, UserProfile]>
+}
+
+const UserContext = createContext<UserContextType | null>(null)
+
 export const UserProvider = ({ children }) => {
-    const [loading, setLoading] = useState(false)
+    const [loadingProfile, setLoadingProfile] = useState(false)
+    const [loadingAuth, setLoadingAuth] = useState(false)
     const [userAuth, setUserAuthHelper] = useState<AuthUser | null>(null)
     const [userProfile, setUserProfileHelper] = useLocalStorage<UserProfile | null>("userProfile", null)
+    const [userLastUpdated, setUserLastUpdated] = useLocalStorage<number | null>("userLastUpdated", null)
     const [authStatus, setAuthStatus] = useState<AuthStatus>(AuthStatus.NoUser)
     const profileStatus = useRef<ProfileStatus>(ProfileStatus.NoProfile)
-    const [userLastUpdated, setUserLastUpdated] = useLocalStorage<number | null>("userLastUpdated", null)
     const navigate = useNavigate()
 
     const setUserProfile = (profile: UserProfile | null) => {
@@ -46,23 +64,21 @@ export const UserProvider = ({ children }) => {
         }
     }
 
-    const setUserAuth = (auth: AuthUser | null) => {
-        if (!auth) {
-            setUserAuthHelper(null)
-            setUserProfile(null)
-            setAuthStatus(AuthStatus.NoUser)
-            console.log("Set authStatus to no user")
-        } else {
-            setUserAuthHelper(auth)
-            setAuthStatus(AuthStatus.SignedIn)
-            console.log(`Not loading new profile, existing auth: ${JSON.stringify(auth)}\n\n authStatus: ${authStatus}\n\n profile: ${JSON.stringify(userProfile)}`)
-        }
-    }
+    // const setUserAuth = (auth: AuthUser | null) => {
+    //     if (!auth) {
+    //         setUserAuthHelper(null)
+    //         setUserProfile(null)
+    //         setAuthStatus(AuthStatus.NoUser)
+    //         console.log("Set authStatus: " + authStatus)
+    //     } else {
+    //         setUserAuthHelper(auth)
+    //         setAuthStatus(AuthStatus.SignedIn)
+    //         console.log(`Not loading new profile, existing auth: ${JSON.stringify(auth)}\n\n authStatus: ${authStatus}\n\n profile: ${JSON.stringify(userProfile)}`)
+    //     }
+    // }
 
     const updateProfile = async (formEntry: ProfileFormEntry): Promise<{ status: LoadStatus, message: string }> => {
-        const oldProfileStatus = profileStatus.current
-        profileStatus.current = ProfileStatus.UpdatingProfile
-
+        setLoadingProfile(true)
         if (userAuth && userProfile) {
             const { name, birth, expYears, email } = formEntry
             const newUserProfile = {
@@ -85,22 +101,19 @@ export const UserProvider = ({ children }) => {
                         return { status: LoadStatus.Success, message: "Profile updated." }
                     }
                     else {
-                        profileStatus.current = oldProfileStatus
                         return { status: LoadStatus.Error, message: "Server error." }
                     }
                 })
-                .catch(() => {
-                    profileStatus.current = oldProfileStatus
-                    return { status: LoadStatus.Error, message: "Error updating profile." }
-                })
+                .catch(() => { return { status: LoadStatus.Error, message: "Error updating profile." } })
+                .finally(() => { setLoadingProfile(false) })
         } else {
-            profileStatus.current = oldProfileStatus
+            setLoadingProfile(false)
             return Promise.reject({ status: LoadStatus.Error, message: "Invalid user session" })
         }
     }
 
     const login = async (authMethod: AuthMethod, data: { email: string, password: string } | undefined) => {
-        // setAuthStatus(AuthStatus.SigningIn)
+        setLoadingAuth(true)
         var authCred: UserCredential
         try {
             if (authMethod === "emailPassword" && data) {
@@ -115,32 +128,34 @@ export const UserProvider = ({ children }) => {
             } else {
                 throw new Error("Invalid auth method specified")
             }
+            // setAuthStatus(AuthStatus.SignedIn)
         } catch (error) {
             console.log("Error signing in!")
-            setUserAuth(null)
+            // setUserAuthHelper(null)
+            setUserProfileHelper(null)
+            // setAuthStatus(AuthStatus.NoUser)
             throw error
+        } finally {
+            setLoadingAuth(false)
         }
-        setUserAuth(authCred.user)
+        // if (authCred) { setUserAuthHelper(authCred.user) }
         navigate("/dashboard/profile")
     }
 
     const logout = () => {
+        setLoadingAuth(true)
         signOut(auth)
-            .then(() => {
-                navigate("/", { replace: true })
-                setUserProfile(null)
-                setUserAuth(null)
-                console.log("Signed out successfully")
-            })
+            .then(() => { console.log("Signed out successfully") })
             .catch(error => { console.log("Error signing out: ", error) })
+            .finally(() => { setLoadingAuth(false) })
     }
 
     const loadProfile = async (userToLoad: AuthUser | null = userAuth): Promise<UserProfile> => {
-        if (profileStatus.current === ProfileStatus.LoadingProfile || profileStatus.current === ProfileStatus.InvalidProfile || !userToLoad || !profileIsStale) {
+        if (loadingProfile || profileStatus.current === ProfileStatus.InvalidProfile || !userToLoad || !profileIsStale) {
             console.log("Not loading profile due to currently loading, invalid profile, or existing updated user data")
             return userProfile ? Promise.resolve(userProfile) : Promise.reject("Not loading profile")
         }
-        profileStatus.current = ProfileStatus.LoadingProfile
+        setLoadingProfile(true)
         console.log(`Loading user profile. --- userToUpdate is null? ${!userToLoad}, user is null? ${!userProfile}, last updated is null? ${!userLastUpdated}, userToLoad: ${userToLoad}`)
         const res = await userToLoad.getIdToken(true)
             .then(idToken => fetch(`${BACKEND_URL}/getUser?uid=${userToLoad.uid}&idToken=${idToken}`))
@@ -149,6 +164,7 @@ export const UserProvider = ({ children }) => {
             return res.text()
                 .then(text => { return Promise.reject("Server error, response: " + text) })
                 .catch(error => { return Promise.reject("Error parsing server error response: " + error.message) })
+                .finally(() => { setLoadingProfile(false) })
         } else {
             return res.json()
                 .then(profile => {
@@ -164,6 +180,7 @@ export const UserProvider = ({ children }) => {
                     setUserProfile(null)
                     return Promise.reject("Error parsing user: " + error.message)
                 })
+                .finally(() => { setLoadingProfile(false) })
         }
     }
 
@@ -171,70 +188,61 @@ export const UserProvider = ({ children }) => {
 
     useEffect(() => {
         const unsubscribe = auth.onAuthStateChanged(async newUserAuth => {
-            setLoading(true)
-            setUserAuth(newUserAuth)
+            setUserAuthHelper(newUserAuth)
+            console.log("newUserAuth: " + JSON.stringify(newUserAuth))
             if (newUserAuth) {
+                setAuthStatus(AuthStatus.SignedIn)
+                setLoadingProfile(true)
                 // console.log(`Auth state change, newUserAuth: ${JSON.stringify(newUserAuth)}`)
                 if (!userProfile || !newUserAuth || userProfile.uid !== newUserAuth.uid) {
                     loadProfile(newUserAuth)
                         // .then(newProfile => console.log(`New user profile: ${JSON.stringify(newProfile)}`))
                         // .then(newProfile => resolve([newUserAuth, newProfile]))
                         .then(newUserProfile => setUserProfile(newUserProfile))
+                        .finally(() => { setLoadingProfile(false) })
                 } else {
                     console.log(`Not loading new profile, new auth: ${JSON.stringify(newUserAuth)}\n\n saved auth: ${JSON.stringify(userAuth)}\n\n authStatus: ${authStatus}\n\n profile: ${JSON.stringify(userProfile)}`)
                     // resolve([newUserAuth, userProfile])
                     // reject(`Invalid user session - userProfile: ${JSON.stringify(userProfile)}, newUserAuth ${newUserAuth}, uid different? ${userProfile.uid !== newUserAuth.uid}`)
+                    setLoadingProfile(false)
                 }
             } else {
-                console.log("onAuthStateChanged - No user session")
+                setAuthStatus(AuthStatus.NoUser)
+                setUserProfile(null)
+                console.log(`onAuthStateChanged - No user session - authStatus: ${authStatus}, userProfile: ${userProfile}`)
+                setTimeout(() => navigate("/"), 3000);
+                // navigate("/")
             }
-            setLoading(false)
             return () => unsubscribe()
         })
     }, [])
 
-    const userProfilePromise = (): Promise<[AuthUser, UserProfile]> => {
-        return new Promise((resolve, reject) => {
-            const unsubscribe = auth.onAuthStateChanged((newUserAuth: AuthUser | null) => {
-                unsubscribe()
-                setUserAuth(newUserAuth)
-                if (newUserAuth) {
-                    // console.log(`Auth state change, newUserAuth: ${JSON.stringify(newUserAuth)}`)
-                    if (!userProfile || !newUserAuth || userProfile.uid !== newUserAuth.uid) {
-                        loadProfile(newUserAuth)
-                            // .then(newProfile => console.log(`New user profile: ${JSON.stringify(newProfile)}`))
-                            .then(newProfile => resolve([newUserAuth, newProfile]))
-                    } else {
-                        console.log(`Not loading new profile, new auth: ${JSON.stringify(newUserAuth)}\n\n saved auth: ${JSON.stringify(userAuth)}\n\n authStatus: ${authStatus}\n\n profile: ${JSON.stringify(userProfile)}`)
-                        resolve([newUserAuth, userProfile])
-                        // reject(`Invalid user session - userProfile: ${JSON.stringify(userProfile)}, newUserAuth ${newUserAuth}, uid different? ${userProfile.uid !== newUserAuth.uid}`)
-                    }
-                } else {
-                    reject("No user session")
-                }
-            })
-        })
-    }
+    // const userProfilePromise = (): Promise<[AuthUser, UserProfile]> => {
+    //     return new Promise((resolve, reject) => {
+    //         const unsubscribe = auth.onAuthStateChanged((newUserAuth: AuthUser | null) => {
+    //             unsubscribe()
+    //             setUserAuth(newUserAuth)
+    //             if (newUserAuth) {
+    //                 // console.log(`Auth state change, newUserAuth: ${JSON.stringify(newUserAuth)}`)
+    //                 if (!userProfile || !newUserAuth || userProfile.uid !== newUserAuth.uid) {
+    //                     loadProfile(newUserAuth)
+    //                         // .then(newProfile => console.log(`New user profile: ${JSON.stringify(newProfile)}`))
+    //                         .then(newProfile => resolve([newUserAuth, newProfile]))
+    //                 } else {
+    //                     console.log(`Not loading new profile, new auth: ${JSON.stringify(newUserAuth)}\n\n saved auth: ${JSON.stringify(userAuth)}\n\n authStatus: ${authStatus}\n\n profile: ${JSON.stringify(userProfile)}`)
+    //                     resolve([newUserAuth, userProfile])
+    //                     // reject(`Invalid user session - userProfile: ${JSON.stringify(userProfile)}, newUserAuth ${newUserAuth}, uid different? ${userProfile.uid !== newUserAuth.uid}`)
+    //                 }
+    //             } else {
+    //                 reject("No user session")
+    //             }
+    //         })
+    //     })
+    // }
 
-    const value = useMemo(() => ({ userProfile, userAuth, authStatus, profileStatus, loading, login, logout, updateProfile, loadProfile, profileIsStale, userProfilePromise }), [userProfile])
+    const value = useMemo(() => ({ userProfile, userAuth, authStatus, profileStatus, loadingProfile, loadingAuth, login, logout, updateProfile, loadProfile, profileIsStale }), [userProfile])
     return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
-
-interface UserContextType {
-    userProfile: UserProfile | null
-    userAuth: AuthUser | null
-    authStatus: AuthStatus
-    profileStatus: React.MutableRefObject<ProfileStatus>
-    loading: boolean
-    login: (authMethod: AuthMethod, data: { email: string, password: string } | undefined) => void
-    logout: () => void
-    updateProfile: (formEntry: ProfileFormEntry) => Promise<{ status: LoadStatus, message: string }>
-    loadProfile: () => Promise<UserProfile>
-    profileIsStale: () => boolean
-    userProfilePromise: () => Promise<[AuthUser, UserProfile]>
-}
-
-const UserContext = createContext<UserContextType | null>(null)
 
 export const useUser = () => {
     const userContext = useContext(UserContext)
@@ -242,16 +250,16 @@ export const useUser = () => {
     return userContext
 }
 
-export const useAwaitedUser = async (): Promise<[UserContextType, AuthUser, UserProfile]> => {
-    const userContext = useContext(UserContext)
-    if (!userContext) { return Promise.reject("No AuthContext provider found") }
-    return userContext.userProfilePromise()
-        .then(([newAuthUser, newUserProfile]) => [userContext, newAuthUser, newUserProfile])
-        // .then(userAuth => {
-        //     if (!userAuth) { return Promise.reject("No user session") }
-        //     if (!userContext.profileIsStale()) { return Promise.resolve(userContext) }
-        // })
-        // .then(() => userContext.loadProfile())
-        // .then(() => userContext)
-        .catch(error => { throw new Error("Error getting awaited user context: " + error) })
-}
+// export const useAwaitedUser = async (): Promise<[UserContextType, AuthUser, UserProfile]> => {
+//     const userContext = useContext(UserContext)
+//     if (!userContext) { return Promise.reject("No AuthContext provider found") }
+//     return userContext.userProfilePromise()
+//         .then(([newAuthUser, newUserProfile]) => [userContext, newAuthUser, newUserProfile])
+//         // .then(userAuth => {
+//         //     if (!userAuth) { return Promise.reject("No user session") }
+//         //     if (!userContext.profileIsStale()) { return Promise.resolve(userContext) }
+//         // })
+//         // .then(() => userContext.loadProfile())
+//         // .then(() => userContext)
+//         .catch(error => { throw new Error("Error getting awaited user context: " + error) })
+// }
