@@ -7,8 +7,8 @@ import { app } from "./firebase"
 
 interface UserState {
     userProfile: UserProfile | null
-    entries: Entry[]
-    tags: Tag[]
+    entries: Entry[] | null
+    tags: Tag[] | null
     userAuth: AuthUser | null
     profileStatus: ProfileStatus
     authStatus: AuthStatus
@@ -19,14 +19,14 @@ interface UserState {
     logout: () => void
     updateProfile: (formEntry: ProfileFormEntry) => Promise<FetchStatus>
     updateContent: (entries: Entry[], tags: Tag[]) => Promise<FetchStatus>
-    setProfile: (profile: UserProfile | null) => void
+    setProfileAndContent: (profile: UserProfile | null, entries: Entry[] | null, tags: Tag[] | null) => void
     setAuth: (auth: AuthUser | null) => void
-    setProfileStatus: (status: ProfileStatus) => void
-    setAuthStatus: (status: AuthStatus) => void
-    setLoadingProfile: (loading: boolean) => void
-    setLoadingAuth: (loading: boolean) => void
-    setUserLastUpdated: (date: number) => void
-    profileIsStale: () => boolean
+    // setProfileStatus: (status: ProfileStatus) => void
+    // setAuthStatus: (status: AuthStatus) => void
+    // setLoadingProfile: (loading: boolean) => void
+    // setLoadingAuth: (loading: boolean) => void
+    // setUserLastUpdated: (date: number) => void
+    shouldUpdateProfile: (auth: AuthUser) => boolean
     isLoading: () => boolean
 }
 
@@ -39,8 +39,8 @@ export const useUserStore = create<UserState>()(
         loadingProfile: false,
         loadingAuth: false,
         userLastUpdated: null,
-        entries: [],
-        tags: [],
+        entries: null,
+        tags: null,
         login: async (authMethod, data) => {
             set(() => ({ loadingAuth: true }))
             try {
@@ -67,7 +67,7 @@ export const useUserStore = create<UserState>()(
         logout: () => {
             set(() => ({ loadingAuth: true }))
             signOut(auth)
-            .finally(() => { set(() => ({ loadingAuth: false })) })
+                .finally(() => { set(() => ({ loadingAuth: false })) })
         },
         updateProfile: async (formEntry) => {
             const userAuth = get().userAuth
@@ -75,23 +75,29 @@ export const useUserStore = create<UserState>()(
             if (!userAuth || !currentProfile || get().authStatus !== AuthStatus.SignedIn) {
                 throw new Error("Invalid user session for updating content")
             }
-            const { name, birth, expYears, email } = formEntry
             const newProfile = {
                 ...currentProfile,
-                name: name,
-                birth: (birth instanceof Date) ? birth.toISOString() : birth,
-                expYears: parseInt(expYears),
-                email: email
+                name: formEntry.name,
+                birth: (formEntry.birth instanceof Date) ? formEntry.birth.toISOString() : formEntry.birth,
+                expYears: parseInt(formEntry.expYears),
+                email: formEntry.email
             }
-            return userAuth.getIdToken()
-                .then(idToken => fetch(`${BACKEND_URL}/updateUserProfile?uid=${userAuth.uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}&email=${email}`))
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error("Invalid server response for updating content")
-                    }
-                    set({ userProfile: newProfile })
-                    return FetchStatus.Success
-                })
+            const result = UserProfileZ.safeParse(newProfile)
+            if (result.success) {
+                const { name, birth, expYears, email } = result.data
+                return userAuth.getIdToken()
+                    .then(idToken => fetch(`${BACKEND_URL}/updateUserProfile?uid=${userAuth.uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}&email=${email}`))
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error("Invalid server response for updating content")
+                        }
+                        set({ userProfile: newProfile })
+                        console.log(`Updated profile: ${JSON.stringify(newProfile)}`)
+                        return FetchStatus.Success
+                    })
+            } else {
+                return FetchStatus.Error
+            }
         },
         updateContent: async (entries, tags) => {
             const userAuth = get().userAuth
@@ -111,36 +117,38 @@ export const useUserStore = create<UserState>()(
                     return FetchStatus.Success
                 })
         },
-        setProfile: (profile) => {
+        setProfileAndContent: (profile, entries, tags) => {
             if (!profile) {
                 set(() => ({
                     userProfile: null,
-                    profileStatus: ProfileStatus.NoProfile
+                    profileStatus: ProfileStatus.NoProfile,
+                    entries: null,
+                    tags: null
                 }))
             } else {
-                const result = UserProfileZ.safeParse(profile)
-                if (result.success) {
-                    console.log("Setting complete user profile: " + JSON.stringify(result.data))
-                    set(() => ({
-                        userProfile: result.data,
-                        profileStatus: ProfileStatus.CompleteProfile
-                    }))
+                const entriesResult = z.array(EntryZ).safeParse(entries)
+                const tagsResult = z.array(TagZ).safeParse(tags)
+                const parsedEntries = entriesResult.success ? entriesResult.data : null
+                const parsedTags = tagsResult.success ? tagsResult.data : null
+                const completeResult = UserProfileZ.safeParse(profile)
+                var parsedProfile: UserProfile | null
+                var profileStatus: ProfileStatus
+                if (completeResult.success) {
+                    parsedProfile = completeResult.data
+                    profileStatus = ProfileStatus.CompleteProfile
+                    console.log("Setting complete user profile: " + JSON.stringify(completeResult.data))
                 } else {
-                    const initResult = InitialUserZ.safeParse(profile)
-                    if (initResult.success) {
-                        console.log("Setting initial incomplete profile")
-                        set(() => ({
-                            userProfile: initResult.data as UserProfile,
-                            profileStatus: ProfileStatus.IncompleteProfile
-                        }))
-                    } else {
-                        console.log("Setting invalid/null profile: " + JSON.stringify(profile) + "\n\n" + initResult.error)
-                        set(() => ({
-                            userProfile: null,
-                            profileStatus: ProfileStatus.InvalidProfile
-                        }))
-                    }
+                    const initProfileResult = InitialUserZ.safeParse(profile)
+                    parsedProfile = initProfileResult.success ? initProfileResult.data as UserProfile : null
+                    profileStatus = initProfileResult.success ? ProfileStatus.IncompleteProfile : ProfileStatus.InvalidProfile
+                    console.log("Setting incomplete or invalid profile: " + JSON.stringify(parsedProfile))
                 }
+                set(() => ({
+                    userProfile: parsedProfile,
+                    profileStatus: profileStatus,
+                    entries: parsedEntries,
+                    tags: parsedTags
+                }))
             }
         },
         setAuth: (auth: AuthUser | null) => {
@@ -148,6 +156,8 @@ export const useUserStore = create<UserState>()(
                 set(() => ({
                     userAuth: null,
                     userProfile: null,
+                    entries: null,
+                    tags: null,
                     authStatus: AuthStatus.NoUser,
                     profileStatus: ProfileStatus.NoProfile
                 }))
@@ -157,8 +167,7 @@ export const useUserStore = create<UserState>()(
                 userAuth: auth,
                 authStatus: AuthStatus.SignedIn
             }))
-            const userProfile = get().userProfile
-            if (!get().loadingProfile && (!userProfile || userProfile.uid !== auth.uid || get().profileIsStale())) {
+            if (get().shouldUpdateProfile(auth)) {
                 set(() => ({ loadingProfile: true }))
                 // console.log(`Loading user profile. --- userToUpdate is null? ${!userToLoad}, user is null? ${!userProfile}, last updated is null? ${!userLastUpdated}, userToLoad: ${userToLoad}`)
                 auth.getIdToken(true)
@@ -168,36 +177,37 @@ export const useUserStore = create<UserState>()(
                             res.text()
                                 .then(text => { throw new Error("Server error while loading profile, response: " + text) })
                                 .catch(error => { throw new Error("Server error, and error parsing server response: " + error.message) })
-                                .finally(() => { set(() => ({ loadingProfile: false })) })
                         } else {
                             res.json()
-                                .then(profile => {
+                                .then(profileAndContent => {
                                     // if (profile.created) { profile.created = new Date(profile.created).toISOString() }
                                     // if (profile.birth) { profile.birth = new Date(profile.birth).toISOString() }
+                                    const { entries, tags, ...profile } = profileAndContent
                                     console.log(`Fetched profile - created: ${profile.created}, birth: ${profile.birth}`)
-                                    get().setProfile(profile)
+                                    get().setProfileAndContent(profile, entries, tags)
                                     set(() => ({ userLastUpdated: Date.now() }))
                                     // console.log(`Updated profile! --- userToUpdate is null? ${!userToLoad}, user is null? ${!userProfile}, last updated is null? ${!userLastUpdated}, userToLoad: ${userToLoad}`)
                                 })
                                 .catch(error => {
-                                    get().setProfile(null)
+                                    get().setProfileAndContent(null, null, null)
                                     throw new Error("Error parsing user: " + error.message)
                                 })
-                                .finally(() => { set(() => ({ loadingProfile: false })) })
                         }
                     })
+                    .finally(() => { set(() => ({ loadingProfile: false })) })
             } else {
                 console.log("Not loading new profile")
             }
         },
-        setProfileStatus: (status) => set(() => ({ profileStatus: status })),
-        setAuthStatus: (status) => set(() => ({ authStatus: status })),
-        setLoadingProfile: (loading) => set(() => ({ loadingProfile: loading })),
-        setLoadingAuth: (loading) => set(() => ({ loadingAuth: loading })),
-        setUserLastUpdated: (date) => set(() => ({ userLastUpdated: date })),
-        profileIsStale: () => {
+        // setProfileStatus: (status) => set(() => ({ profileStatus: status })),
+        // setAuthStatus: (status) => set(() => ({ authStatus: status })),
+        // setLoadingProfile: (loading) => set(() => ({ loadingProfile: loading })),
+        // setLoadingAuth: (loading) => set(() => ({ loadingAuth: loading })),
+        // setUserLastUpdated: (date) => set(() => ({ userLastUpdated: date })),
+        shouldUpdateProfile: (auth) => {
             const userLastUpdated = get().userLastUpdated
-            return !get().userProfile || !userLastUpdated || !get().userAuth || (Date.now() - userLastUpdated) > 120000
+            const userProfile = get().userProfile
+            return (!get().loadingProfile && (!userProfile || userProfile.uid !== auth.uid || !userLastUpdated || (Date.now() - userLastUpdated) > 120000))
         },
         isLoading: () => (get().loadingProfile || get().loadingAuth || !get().userProfile || !get().userAuth) && (get().authStatus !== AuthStatus.NoUser)
     }))

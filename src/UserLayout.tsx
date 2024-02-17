@@ -20,13 +20,13 @@ export const UserLayout = () => {
     }, [])
 
     return <>
-        <p>loading profile {JSON.stringify(loadingProfile)}, auth {JSON.stringify(loadingAuth)}
+        {/* <p>loading profile {JSON.stringify(loadingProfile)}, auth {JSON.stringify(loadingAuth)}
             <br></br>
             userProfile {JSON.stringify(userProfile)}
             <br></br>
             userAuth {JSON.stringify(userAuth)}
             <br></br>
-            authStatus {authStatus}</p>
+            authStatus {authStatus}</p> */}
         {(loadingProfile || loadingAuth) ? <Loader /> : outlet}
     </>
 }
