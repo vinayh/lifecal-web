@@ -1,10 +1,10 @@
 import { Navigate, Outlet, Link } from "react-router-dom"
-import { useUser } from "./useUser"
+import { useUserStore } from "./user"
 
 export const PublicLayout = () => {
-  const { userProfile: user } = useUser()
+  const { userProfile } = useUserStore()
 
-  if (user) {
+  if (userProfile) {
     return <Navigate to="/dashboard/profile" />
   }
 

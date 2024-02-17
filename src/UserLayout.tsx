@@ -1,30 +1,32 @@
-import { useEffect } from "react"
-// import { useLoaderData, useOutlet, Await, useAsyncError } from "react-router-dom"
+import { z } from "zod"
 import { Loader } from "@mantine/core"
-import { useUser } from "./useUser"
-import { AuthStatus } from "./user"
+import { useEffect } from "react"
+import { useNavigate, useOutlet } from "react-router-dom"
 
-export const UserLayout = ({ children }) => {
-    // const outlet = useOutlet()
-    const { userAuth, userProfile, authStatus, loadingProfile, loadingAuth } = useUser()
-    var isLoading: boolean = false
+import { auth, useUserStore } from "./user"
+
+export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
+
+export const UserLayout = () => {
+    const outlet = useOutlet()
+    const navigate = useNavigate()
+    const { userProfile, userAuth, authStatus, loadingProfile, loadingAuth, setAuth } = useUserStore()
 
     useEffect(() => {
-        const unsubscribe = () => {
-            isLoading = (loadingProfile || loadingAuth || !userProfile || !userAuth) && (authStatus !== AuthStatus.NoUser)
+        const unsubscribe = auth.onAuthStateChanged(async newUserAuth => {
+            setAuth(newUserAuth)
             return () => unsubscribe()
-        }
-    }, [loadingProfile, loadingAuth, userProfile, userAuth, authStatus])
+        })
+    }, [])
 
-    
     return <>
-    <p>loading profile {JSON.stringify(loadingProfile)}, auth {JSON.stringify(loadingAuth)}
-    <br></br>
-    userProfile {JSON.stringify(userProfile)}
-    <br></br>
-    userAuth {JSON.stringify(userAuth)}
-    <br></br>
-    authStatus {authStatus}</p>
-    {isLoading ? <Loader /> : children}
+        <p>loading profile {JSON.stringify(loadingProfile)}, auth {JSON.stringify(loadingAuth)}
+            <br></br>
+            userProfile {JSON.stringify(userProfile)}
+            <br></br>
+            userAuth {JSON.stringify(userAuth)}
+            <br></br>
+            authStatus {authStatus}</p>
+        {(loadingProfile || loadingAuth) ? <Loader /> : outlet}
     </>
 }

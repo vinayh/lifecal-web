@@ -1,8 +1,8 @@
 import { Navigate, Outlet, Link } from "react-router-dom"
-import { useUser } from "./useUser"
+import { useUserStore } from "./user"
 
 export const PrivateLayout = () => {
-  const { userProfile, logout } = useUser();
+  const { userProfile, logout } = useUserStore()
 
   if (!userProfile) {
     return <Navigate to="/" />;

@@ -4,17 +4,17 @@ import { Route, Navigate } from "react-router-dom"
 import { User as AuthUser } from "firebase/auth"
 
 import { UserProfile } from "./UserProfile"
-import { UserProfile, UserProfileZ, InitialUserZ, LoadStatus, fetchUser } from "./user"
+import { UserProfile, UserProfileZ, InitialUserZ, FetchStatus, fetchUser } from "./user"
 
 export default function PrivateRoute({ authUser, authLoading, user, setUser, children }: { authUser: AuthUser | null | undefined, authLoading: boolean, user: UserProfile | null, setUser: Dispatch<SetStateAction<UserProfile | null>>, children: ReactNode }) {
-    const [loadUserStatus, setLoadUserStatus] = useState<LoadStatus>(LoadStatus.Loading)
+    const [loadUserStatus, setLoadUserStatus] = useState<FetchStatus>(FetchStatus.Loading)
     
     console.log(`PrivateRoute - loading: ${authLoading}, authUser:`, authUser)
     if (authUser == null && authLoading == false) { return <Navigate to="/login" replace /> }
 
-    if (loadUserStatus === LoadStatus.Loading) {
+    if (loadUserStatus === FetchStatus.Loading) {
         return <p>Loading user data...</p>
-    } else if (loadUserStatus === LoadStatus.Success) {
+    } else if (loadUserStatus === FetchStatus.Success) {
         if (UserProfileZ.safeParse(user).success) {
             return children
         }
@@ -27,7 +27,7 @@ export default function PrivateRoute({ authUser, authLoading, user, setUser, chi
                 return <p>Invalid user data, Zod error: {initResult.error.toString()}</p>
             }
         }
-    } else if (loadUserStatus === LoadStatus.Error) {
+    } else if (loadUserStatus === FetchStatus.Error) {
         return <p>Cannot load user. {errorMessage}</p>
     }
 }

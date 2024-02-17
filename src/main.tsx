@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App, { router } from "./App.tsx";
+import { router } from "./App.tsx";
 import { MantineProvider } from "@mantine/core"
 import { theme } from "./theme"
 import { RouterProvider } from "react-router-dom"

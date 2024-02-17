@@ -1,7 +1,6 @@
 import { z } from "zod"
 import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react'
 import { useForm } from '@mantine/form'
-import usePromise from "react-promise-suspense"
 import {
     TextInput,
     PasswordInput,
@@ -17,11 +16,10 @@ import {
     Stack,
 } from '@mantine/core';
 
-import { AuthStatus } from "./user"
-import { useUser } from "./useUser"
+import { AuthStatus, useUserStore } from "./user"
 
 export default function Login() {
-    const { login, authStatus } = useUser()
+    const { login, authStatus } = useUserStore()
     // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => { return z.string().email().safeParse(email).success }
 

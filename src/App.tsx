@@ -8,11 +8,10 @@ import Home from "./Home"
 
 import { Calendar } from "./Calendar"
 import { UserProfile } from "./UserProfile"
-import { UserProvider, useUser } from "./useUser"
+// import { UserProvider, useUser } from "./useUser"
 import { PublicLayout } from "./PublicLayout"
 import { PrivateLayout } from "./PrivateLayout"
 import { UserLayout } from "./UserLayout"
-import { UserAuthLayout } from "./UserAuthLayout"
 
 // import PrivateRoute from "./PrivateRoute"
 
@@ -76,7 +75,7 @@ import { UserAuthLayout } from "./UserAuthLayout"
 // }
 
 export const router = createBrowserRouter(createRoutesFromElements(
-  <Route element={<UserAuthLayout />}>
+  <Route element={<UserLayout />}>
     <Route element={<PublicLayout />}>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
