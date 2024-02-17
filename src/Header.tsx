@@ -1,7 +1,7 @@
-import { Button, Container, Divider, Group } from "@mantine/core"
+import { Container, Divider, Group } from "@mantine/core"
 import { IconHome2, IconUser, IconSettings, IconLogout, IconLogin, IconCalendar, IconInfoCircle } from "@tabler/icons-react"
 import classes from "./static/header.module.css"
-import { useNavigate, useLocation, Link } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 
 import { AuthStatus, useUserStore } from "./user"
 import { ReactNode } from "react"
@@ -21,7 +21,6 @@ export const Header = () => {
     const { userAuth, authStatus, logout } = useUserStore()
     const navigate = useNavigate()
     const location = useLocation()
-    // const [active, setActive] = useState(privateLinks[0].link)
 
     const renderLink = (link: { link: string, label: string, icon: ReactNode }) => {
         return (
@@ -32,7 +31,6 @@ export const Header = () => {
                 data-active={location.pathname === link.link || undefined}
                 onClick={(event) => {
                     event.preventDefault()
-                    // setActive(link.link)
                     navigate(link.link)
                 }}
             >
@@ -60,7 +58,6 @@ export const Header = () => {
     return (
         <header className={classes.header}>
             <Container size="md" className={classes.inner}>
-                {/* <MantineLogo size={28} /> */}
                 <Group gap={5} visibleFrom="xs">
                     {links.map(renderLink)}
                 </Group>

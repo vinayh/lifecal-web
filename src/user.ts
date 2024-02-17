@@ -80,23 +80,23 @@ export const useUserStore = create<UserState>()(
                 name: formEntry.name,
                 birth: (formEntry.birth instanceof Date) ? formEntry.birth.toISOString() : formEntry.birth,
                 expYears: parseInt(formEntry.expYears),
-                email: formEntry.email
+                // email: formEntry.email
             }
             const result = UserProfileZ.safeParse(newProfile)
             if (result.success) {
-                const { name, birth, expYears, email } = result.data
+                const { name, birth, expYears } = result.data
                 return userAuth.getIdToken()
-                    .then(idToken => fetch(`${BACKEND_URL}/updateUserProfile?uid=${userAuth.uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}&email=${email}`))
+                    .then(idToken => fetch(`${BACKEND_URL}/updateUserProfile?uid=${userAuth.uid}&idToken=${idToken}&name=${name}&birth=${birth}&expYears=${expYears}`))
                     .then(res => {
                         if (!res.ok) {
                             throw new Error("Invalid server response for updating content")
                         }
                         set({ userProfile: newProfile })
                         console.log(`Updated profile: ${JSON.stringify(newProfile)}`)
-                        return FetchStatus.Success
+                        return Promise.resolve(FetchStatus.Success)
                     })
             } else {
-                return FetchStatus.Error
+                return Promise.reject(FetchStatus.Error)
             }
         },
         updateContent: async (entries, tags) => {
@@ -271,4 +271,4 @@ export type UserProfile = z.infer<typeof UserProfileZ>
 
 export const InitialUserZ = UserProfileZ.partial({ name: true, birth: true, expYears: true, email: true })
 
-export type ProfileFormEntry = { name: string, birth: string | Date, expYears: string, email: string }
+export type ProfileFormEntry = { name: string, birth: string | Date, expYears: string }

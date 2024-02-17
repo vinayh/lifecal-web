@@ -1,27 +1,51 @@
 import { z } from "zod"
-import { SetStateAction, useState, Dispatch } from "react";
-import { useForm } from "@mantine/form";
-import { DateInput } from "@mantine/dates";
-import { TextInput, Button, Group, Text, Paper, Center, Container } from "@mantine/core";
-import { FetchStatus, ProfileFormEntry, useUserStore } from "./user";
+import { useState } from "react"
+import { useForm } from "@mantine/form"
+import { DateInput } from "@mantine/dates"
+import { notifications } from "@mantine/notifications"
+import { TextInput, Button, Group, Text, Paper, Center, Container, rem } from "@mantine/core"
+
+import { FetchStatus, ProfileFormEntry, useUserStore } from "./user"
+import { IconCheck, IconX } from "@tabler/icons-react"
 
 export function UserProfile() {
-    // const [errorMessage, setErrorMessage] = useState<string | undefined>()
-    const [updateStatus, setUpdateStatus] = useState<FetchStatus | null>(null)
-    const [updateMessage, setUpdateMessage] = useState<string | null>(null)
-
-    const { updateProfile, profileStatus, authStatus, userAuth, userProfile } = useUserStore()
+    const { updateProfile, userProfile } = useUserStore()
 
     const onSubmitProfileUpdate = (formEntry: ProfileFormEntry) => {
         form.validate()
-        setUpdateStatus(FetchStatus.Loading)
-        setUpdateMessage("Saving profile...")
+        const id = notifications.show({
+            loading: true,
+            title: "Updating profile",
+            message: "Please wait...",
+            autoClose: false,
+            withCloseButton: false,
+        })
         updateProfile(formEntry)
-            .then(res => {
-                setUpdateStatus(res.status)
-                setUpdateMessage(res.message)
+            .then(() => {
+                console.log("Success received")
+                notifications.update({
+                    id,
+                    color: "teal",
+                    title: "Profile updated",
+                    message: "Profile changes have been saved.",
+                    icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
+                    loading: false,
+                    autoClose: 3000
+                })
+                console.log("Updated notif")
             })
-            .catch(error => { throw new Error("Profile update error: " + JSON.stringify(error)) })
+            .catch(error => {
+                notifications.update({
+                    id,
+                    color: "red",
+                    title: "Error",
+                    message: "Error updating profile",
+                    icon: <IconX style={{ width: rem(18), height: rem(18) }} />,
+                    loading: false,
+                    autoClose: 3000
+                })
+                console.error("Profile update error: " + JSON.stringify(error))
+            })
     }
 
     const form = useForm({
@@ -48,6 +72,7 @@ export function UserProfile() {
             <form onSubmit={form.onSubmit(onSubmitProfileUpdate)}>
                 <TextInput
                     withAsterisk
+                    disabled
                     label="Email"
                     placeholder="your@email.com"
                     {...form.getInputProps("email")} />

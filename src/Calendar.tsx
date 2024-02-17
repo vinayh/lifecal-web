@@ -1,8 +1,9 @@
 import { Fragment, ReactElement } from "react"
+import { Navigate } from "react-router-dom"
 import { Group, Tooltip } from "@mantine/core"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
-import { UserProfile, Entry, useUserStore } from "./user"
+import { UserProfile, Entry, useUserStore, ProfileStatus } from "./user"
 import "./static/calendar.css"
 
 const generateEntries = (user: UserProfile, entries: Entry[]): Map<string, Entry | null> => {
@@ -25,9 +26,12 @@ const renderEntry = (date: string, entry: Entry | null): ReactElement => {
 }
 
 export function Calendar() {
-    const { userAuth, userProfile, entries } = useUserStore()
+    const { userAuth, userProfile, entries, profileStatus } = useUserStore()
     // const [{ profileStatus, authStatus }, userAuth, userProfile] = usePromise(useAwaitedUser, [])
 
+    if (profileStatus !== ProfileStatus.CompleteProfile) {
+        return <Navigate to="/dashboard/profile" />
+    }
     if (userProfile && userAuth && entries) {
         const allEntries = generateEntries(userProfile, entries)
         console.log(allEntries)

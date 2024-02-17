@@ -1,15 +1,14 @@
 import { z } from "zod"
 import { useOutlet } from "react-router-dom"
-import { Notifications } from "@mantine/notifications"
 import { auth, useUserStore } from "./user"
 import { useEffect } from "react"
-import { Center, Container, Loader, LoadingOverlay, Paper } from "@mantine/core"
+import { Center, Container, LoadingOverlay } from "@mantine/core"
 import { Header } from "./Header"
 
 export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
 
 export const UserLayout = () => {
-    const { loadingProfile, loadingAuth, userProfile, setAuth } = useUserStore()
+    const { loadingProfile, loadingAuth, setAuth } = useUserStore()
     const outlet = useOutlet()
 
     useEffect(() => {
