@@ -177,6 +177,7 @@ export const useUserStore = create<UserState>()(
                             res.text()
                                 .then(text => { throw new Error("Server error while loading profile, response: " + text) })
                                 .catch(error => { throw new Error("Server error, and error parsing server response: " + error.message) })
+                                .finally(() => { set(() => ({ loadingProfile: false })) })
                         } else {
                             res.json()
                                 .then(profileAndContent => {
@@ -192,9 +193,9 @@ export const useUserStore = create<UserState>()(
                                     get().setProfileAndContent(null, null, null)
                                     throw new Error("Error parsing user: " + error.message)
                                 })
+                                .finally(() => { set(() => ({ loadingProfile: false })) })
                         }
                     })
-                    .finally(() => { set(() => ({ loadingProfile: false })) })
             } else {
                 console.log("Not loading new profile")
             }

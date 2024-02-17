@@ -1,5 +1,5 @@
 import { Fragment, ReactElement } from "react"
-import { Center, Grid, Group, SimpleGrid, Tooltip } from "@mantine/core"
+import { Group, Tooltip } from "@mantine/core"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
 import { UserProfile, Entry, useUserStore } from "./user"
@@ -39,13 +39,11 @@ export function Calendar() {
         return <>
             {/* <p>Date of birth: {userProfile.birth}</p>
             <p>{userProfile.name}, {userProfile.email}</p> */}
-            <Center>
-                <Fragment>
-                    <Group maw={1000} gap="xs" align="right">
-                        {toRender}
-                    </Group >
-                </Fragment>
-            </Center>
+            <Fragment>
+                <Group maw={1000} pl={10} gap="xs" align="right">
+                    {toRender}
+                </Group >
+            </Fragment>
         </>
     } else {
         console.log(userProfile, userAuth)
