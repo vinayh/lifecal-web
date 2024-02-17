@@ -1,4 +1,4 @@
-import { Navigate, Outlet, Link } from "react-router-dom"
+import { Navigate, Outlet } from "react-router-dom"
 import { useUserStore } from "./user"
 
 export const PublicLayout = () => {
@@ -8,14 +8,5 @@ export const PublicLayout = () => {
     return <Navigate to="/dashboard/profile" />
   }
 
-  return (
-    <div>
-      <nav>
-        <Link to="/">Home</Link>
-        <br></br>
-        <Link to="/login">Login</Link>
-      </nav>
-      <Outlet />
-    </div>
-  )
+  return <Outlet />
 }

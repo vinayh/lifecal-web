@@ -1,10 +1,9 @@
 import { Fragment, ReactElement } from "react"
-import { Grid, Tooltip } from "@mantine/core"
+import { Center, Grid, Group, SimpleGrid, Tooltip } from "@mantine/core"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
 import { UserProfile, Entry, useUserStore } from "./user"
-import { useUser } from "./useUser"
-import "./static/style.css"
+import "./static/calendar.css"
 
 const generateEntries = (user: UserProfile, entries: Entry[]): Map<string, Entry | null> => {
     const birth = new Date(user.birth)
@@ -21,9 +20,7 @@ const generateEntries = (user: UserProfile, entries: Entry[]): Map<string, Entry
 const renderEntry = (date: string, entry: Entry | null): ReactElement => {
     const divClass = (isPast(date)) ? ((entry !== null) ? "entry filled" : "entry past") : "entry future"
     return (
-        // <Tooltip key={date} label={date}>
-            <div key={date} className={divClass}></div>
-        // </Tooltip>
+        <div key={date} className={divClass}></div>
     )
 }
 
@@ -31,7 +28,7 @@ export function Calendar() {
     const { userAuth, userProfile, entries } = useUserStore()
     // const [{ profileStatus, authStatus }, userAuth, userProfile] = usePromise(useAwaitedUser, [])
 
-    if (userProfile && userAuth) {
+    if (userProfile && userAuth && entries) {
         const allEntries = generateEntries(userProfile, entries)
         console.log(allEntries)
         const toRender: Array<ReactElement> = []
@@ -40,13 +37,15 @@ export function Calendar() {
         })
         console.log(`Rendering calendar with ${toRender.length} entries`)
         return <>
-            <p>Date of birth: {userProfile.birth}</p>
-            <p>{userProfile.name}, {userProfile.email}</p>
-            <Grid>
+            {/* <p>Date of birth: {userProfile.birth}</p>
+            <p>{userProfile.name}, {userProfile.email}</p> */}
+            <Center>
                 <Fragment>
-                    {toRender}
+                    <Group maw={1000} gap="xs" align="right">
+                        {toRender}
+                    </Group >
                 </Fragment>
-            </Grid >
+            </Center>
         </>
     } else {
         console.log(userProfile, userAuth)

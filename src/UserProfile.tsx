@@ -48,7 +48,7 @@ export function UserProfile() {
 
 
     return <>
-        <p>{userProfile.uid}<br></br>{userAuth.uid}</p>
+        {/* <p>{userProfile.uid}<br></br>{userAuth.uid}</p> */}
         <Center pt={25}>
             <Paper radius="md" p="xl" shadow="lg" w={400}>
                 <Text size="lg" fw={500}>
