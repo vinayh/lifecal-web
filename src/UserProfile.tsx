@@ -1,11 +1,10 @@
 import { z } from "zod"
-import { useState } from "react"
 import { useForm } from "@mantine/form"
 import { DateInput } from "@mantine/dates"
 import { notifications } from "@mantine/notifications"
-import { TextInput, Button, Group, Text, Paper, Center, Container, rem } from "@mantine/core"
+import { TextInput, Button, Group, Text, Paper, rem } from "@mantine/core"
 
-import { FetchStatus, ProfileFormEntry, useUserStore } from "./user"
+import { ProfileFormEntry, useUserStore } from "./user"
 import { IconCheck, IconX } from "@tabler/icons-react"
 
 export function UserProfile() {

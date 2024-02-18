@@ -1,5 +1,5 @@
 import { Container, Divider, Group } from "@mantine/core"
-import { IconHome2, IconUser, IconSettings, IconLogout, IconLogin, IconCalendar, IconInfoCircle } from "@tabler/icons-react"
+import { IconHome2, IconUser, IconLogout, IconLogin, IconCalendar, IconInfoCircle } from "@tabler/icons-react"
 import classes from "./static/header.module.css"
 import { useNavigate, useLocation } from "react-router-dom"
 

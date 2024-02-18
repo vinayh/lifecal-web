@@ -1,5 +1,5 @@
 import { IconX, IconCheck } from "@tabler/icons-react"
-import { Notification, Loader, rem } from "@mantine/core"
+import { Notification, rem } from "@mantine/core"
 
 import { FetchStatus } from "./user"
 
