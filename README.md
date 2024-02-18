@@ -1,5 +1,5 @@
-# Mantine Vite template
+# LifeCal
 
-Get started with the template by clicking `Use this template` button on the top of the page.
+(Currently in progress)
 
-[Documentation](https://mantine.dev/guides/vite/)
+This is a interactive web app based on the Life Calendar proposed on the [Wait But Why blog](https://waitbutwhy.com/2014/05/life-weeks.html) which aims to provide a straightforward and efficient interface to store and track progress on the scale of a lifetime, including adding labels/tags, notes, etc.
