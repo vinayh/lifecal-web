@@ -14,14 +14,16 @@ interface UserState {
     profileStatus: ProfileStatus
     authStatus: AuthStatus
     setProfile: (profile: UserProfile | null) => void
+    setEntry: (entry: Entry) => void
     setEntries: (entries: Entry[] | null) => void
     setTags: (tags: Tag[] | null) => void
     loadingProfile: boolean
     loadingAuth: boolean
     login: (authMethod: AuthMethod, data: { email: string, password: string } | undefined) => void
     logout: () => void
-    updateProfile: (formEntry: ProfileFormEntry) => Promise<FetchStatus>
+    updateProfile: (formData: ProfileFormData) => Promise<FetchStatus>
     updateContent: (entries: Entry[], tags: Tag[]) => Promise<FetchStatus>
+    addUpdateEntry: (formData : EntryFormData) => Promise<FetchStatus>
     setAuth: (auth: AuthUser | null) => void
     shouldUpdateProfile: (auth: AuthUser) => boolean
     isLoading: () => boolean
@@ -66,6 +68,23 @@ export const useUserStore = create<UserState>()(
                     }
                 }
             },
+            setEntry: (newEntry) => {
+                const entries = get().entries
+                if (!entries) {
+                    set(() => ({ entries: [newEntry] }))
+                    return
+                }
+                var replaceExisting = false
+                entries.forEach((entry, entryIdx) => {
+                    if (entry.start === newEntry.start) {
+                        entries[entryIdx] = newEntry
+                        replaceExisting = true
+                    }
+                })
+                if (!replaceExisting) {
+                    entries.push(newEntry)
+                }
+            },
             setEntries: (entries) => {
                 const result = z.array(EntryZ).safeParse(entries)
                 if (result.success) {
@@ -108,7 +127,7 @@ export const useUserStore = create<UserState>()(
                 signOut(auth)
                     .finally(() => { set(() => ({ loadingAuth: false })) })
             },
-            updateProfile: async (formEntry) => {
+            updateProfile: async (formData) => {
                 const userAuth = get().userAuth
                 const currentProfile = get().userProfile
                 if (!userAuth || !currentProfile || get().authStatus !== AuthStatus.SignedIn) {
@@ -116,9 +135,9 @@ export const useUserStore = create<UserState>()(
                 }
                 const newProfile = {
                     ...currentProfile,
-                    name: formEntry.name,
-                    birth: (formEntry.birth instanceof Date) ? formEntry.birth.toISOString() : formEntry.birth,
-                    expYears: parseInt(formEntry.expYears),
+                    name: formData.name,
+                    birth: (formData.birth instanceof Date) ? formData.birth.toISOString() : formData.birth,
+                    expYears: parseInt(formData.expYears),
                     // email: formEntry.email
                 }
                 const result = UserProfileZ.safeParse(newProfile)
@@ -153,6 +172,28 @@ export const useUserStore = create<UserState>()(
                         get().setTags(tags)
                         return FetchStatus.Success
                     })
+            },
+            addUpdateEntry: async (formData) => {
+                const userAuth = get().userAuth
+                if (!userAuth || !get().userProfile || get().authStatus !== AuthStatus.SignedIn) {
+                    throw new Error("Invalid user session for adding/updating entry")
+                }
+                const result = EntryZ.safeParse(formData)
+                if (result.success) {
+                    const { start, note, tags } = result.data
+                    return userAuth.getIdToken()
+                        .then(idToken => fetch(`${BACKEND_URL}/addUpdateEntry?uid=${userAuth.uid}&idToken=${idToken}&start=${start}&note=${note}&tags=${tags}`))
+                        .then(res => {
+                            if (!res.ok) {
+                                throw new Error("Invalid server response for updating entry")
+                            }
+                            get().setEntry(result.data)
+                            console.log(`Updated entry: ${JSON.stringify(result.data)}`)
+                            return Promise.resolve(FetchStatus.Success)
+                        })
+                } else {
+                    return Promise.reject(FetchStatus.Error)
+                }
             },
             setAuth: (auth: AuthUser | null) => {
                 if (!auth) {
@@ -289,4 +330,6 @@ export type UserProfile = z.infer<typeof UserProfileZ>
 
 export const InitialUserZ = UserProfileZ.partial({ name: true, birth: true, expYears: true, email: true })
 
-export type ProfileFormEntry = { name: string, birth: string | Date, expYears: string }
+export type ProfileFormData = { name: string, birth: string | Date, expYears: string }
+
+export type EntryFormData = { start: string | Date, note: string, tags: string }

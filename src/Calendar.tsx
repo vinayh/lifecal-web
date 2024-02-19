@@ -6,16 +6,17 @@ import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday
 
 import { UserProfile, Entry, useUserStore, ProfileStatus } from "./user"
 import "./static/calendar.css"
+import { EntryForm } from "./EntryForm"
+
+export type EntryInfo = {
+    date: string
+    entry: Entry | null
+}
 
 export function Calendar() {
     const { userAuth, userProfile, entries, profileStatus } = useUserStore()
-    const [selectedEntry, setSelectedEntry] = useState<EntryInfo>()
+    const [selectedEntry, setSelectedEntry] = useState<EntryInfo | null>(null)
     const [opened, { open, close }] = useDisclosure(false)
-
-    type EntryInfo = {
-        date: string
-        entry: Entry | null
-    }
 
     const generateEntries = (user: UserProfile, entries: Entry[]): EntryInfo[] => {
         const birth = new Date(user.birth)
@@ -32,11 +33,6 @@ export function Calendar() {
         return allEntries
     }
 
-    const renderModalContent = () => {
-        if (!selectedEntry) { return null }
-        return selectedEntry.date
-    }
-
     const renderCalEntry = (entryInfo: EntryInfo): ReactElement => {
         const { date, entry } = entryInfo
         const divClass = isPast(date) ? ((entry !== null) ? "entry filled" : "entry past") : "entry future"
@@ -51,9 +47,9 @@ export function Calendar() {
         const allEntries = generateEntries(userProfile, entries)
         console.log(`Rendering calendar with ${allEntries.length} entries`)
         return <>
-            <Modal opened={opened} onClose={close} title="Entry">
-                {renderModalContent()}
-            </Modal>
+        <Modal opened={opened} onClose={() => { close(); setSelectedEntry(null); }} title="Entry">
+            {selectedEntry ? <EntryForm entryInfo={selectedEntry} /> : null}
+        </Modal>
             <Fragment>
                 <Group maw={1000} pl={10} gap="xs" align="right">
                     {allEntries.map(entry => renderCalEntry(entry))}

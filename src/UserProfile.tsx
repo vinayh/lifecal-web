@@ -4,13 +4,13 @@ import { DateInput } from "@mantine/dates"
 import { notifications } from "@mantine/notifications"
 import { TextInput, Button, Group, Text, Paper, rem } from "@mantine/core"
 
-import { ProfileFormEntry, useUserStore } from "./user"
+import { ProfileFormData, useUserStore } from "./user"
 import { IconCheck, IconX } from "@tabler/icons-react"
 
 export function UserProfile() {
     const { updateProfile, userProfile } = useUserStore()
 
-    const onSubmitProfileUpdate = (formEntry: ProfileFormEntry) => {
+    const onSubmitProfileUpdate = (formEntry: ProfileFormData) => {
         form.validate()
         const id = notifications.show({
             loading: true,
@@ -31,14 +31,13 @@ export function UserProfile() {
                     loading: false,
                     autoClose: 3000
                 })
-                console.log("Updated notif")
             })
             .catch(error => {
                 notifications.update({
                     id,
                     color: "red",
                     title: "Error",
-                    message: "Error updating profile",
+                    message: "Error updating profile.",
                     icon: <IconX style={{ width: rem(18), height: rem(18) }} />,
                     loading: false,
                     autoClose: 3000
@@ -63,7 +62,6 @@ export function UserProfile() {
     })
 
     return <>
-        {/* <p>{userProfile.uid}<br></br>{userAuth.uid}</p> */}
         <Paper radius="md" p="xl" shadow="lg" w={400}>
             <Text size="lg" fw={500}>
                 Update profile
