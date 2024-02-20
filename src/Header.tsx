@@ -8,8 +8,8 @@ import { ReactNode } from "react"
 
 const privateLinks = [
     { link: "/", label: "Home", icon: <IconHome2 /> },
-    { link: "/dashboard/calendar", label: "Calendar", icon: <IconCalendar /> },
-    { link: "/dashboard/profile", label: "Profile", icon: <IconUser /> }
+    { link: "/calendar", label: "Calendar", icon: <IconCalendar /> },
+    { link: "/profile", label: "Profile", icon: <IconUser /> }
 ]
 
 const publicLinks = [

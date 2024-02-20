@@ -17,7 +17,7 @@ export const router = createBrowserRouter(createRoutesFromElements(
       <Route path="/login" element={<Login />} />
     </Route>
 
-    <Route path="/dashboard" element={<PrivateLayout />}>
+    <Route path="/" element={<PrivateLayout />}>
       <Route path="profile" element={<UserProfile />} />
       <Route path="calendar" element={<Calendar />} />
     </Route>

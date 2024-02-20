@@ -6,8 +6,8 @@ export const PublicLayout = () => {
 
   if (userProfile) {
     const target = (profileStatus === ProfileStatus.CompleteProfile
-      ? "/dashboard/calendar"
-      : "/dashboard/profile")
+      ? "/calendar"
+      : "/profile")
       return <Navigate to={target} />
   }
   

@@ -41,7 +41,7 @@ export function Calendar() {
     }
 
     if (profileStatus !== ProfileStatus.CompleteProfile) {
-        return <Navigate to="/dashboard/profile" />
+        return <Navigate to="/profile" />
     }
     if (userProfile && userAuth && entries) {
         const allEntries = generateEntries(userProfile, entries)
