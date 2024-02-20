@@ -5,7 +5,7 @@ import { useDisclosure } from "@mantine/hooks"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
 import { UserProfile, Entry, useUserStore, ProfileStatus } from "./user"
-import "./static/calendar.css"
+import "/public/styles/calendar.css"
 import { EntryForm } from "./EntryForm"
 
 export type EntryInfo = {

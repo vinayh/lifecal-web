@@ -22,7 +22,7 @@ export const UserLayout = () => {
 
     return <>
         <Header />
-        <Notifications />
+        <Notifications position="top-right" />
         <Center>
             <Container maw={1000} mt={0}>
                 <LoadingOverlay visible={loadingProfile || loadingAuth} zIndex={0} overlayProps={{ radius: "sm", blur: 2 }} />
