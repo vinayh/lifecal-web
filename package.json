@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "deploy": "gh-pages -d dist",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -18,7 +19,6 @@
     "@tabler/icons-react": "^2.47.0",
     "@uidotdev/usehooks": "^2.4.1",
     "date-fns": "^3.3.1",
-    "dayjs": "^1.11.10",
     "firebase": "^10.8.0",
     "firebaseui": "^6.1.0",
     "react": "^18.2.0",
@@ -30,6 +30,7 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@types/gh-pages": "^6",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@typescript-eslint/eslint-plugin": "^7.0.1",
@@ -38,6 +39,7 @@
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.35",
     "postcss-preset-mantine": "^1.13.0",
     "postcss-simple-vars": "^7.0.1",
