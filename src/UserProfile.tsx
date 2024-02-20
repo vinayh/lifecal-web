@@ -6,6 +6,7 @@ import { TextInput, Button, Group, Text, Paper, rem } from "@mantine/core"
 
 import { ProfileFormData, useUserStore } from "./user"
 import { IconCheck, IconX } from "@tabler/icons-react"
+import "@mantine/dates/styles.css"
 
 export function UserProfile() {
     const { updateProfile, userProfile } = useUserStore()

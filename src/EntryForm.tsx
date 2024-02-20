@@ -6,6 +6,7 @@ import { EntryFormData, useUserStore } from "./user"
 import { useForm } from "@mantine/form"
 import { DateInput } from "@mantine/dates"
 import { EntryInfo } from "./Calendar"
+import "@mantine/dates/styles.css"
 
 export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
     const { addUpdateEntry } = useUserStore()
