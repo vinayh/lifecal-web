@@ -8,7 +8,7 @@ import { Calendar } from "./Calendar"
 import { UserProfile } from "./UserProfile"
 import { PublicLayout } from "./PublicLayout"
 import { PrivateLayout } from "./PrivateLayout"
-import { UserLayout } from "./UserLayout"
+import { UserLayout } from "./Layout"
 
 export const router = createBrowserRouter(createRoutesFromElements(
   <Route element={<UserLayout />}>

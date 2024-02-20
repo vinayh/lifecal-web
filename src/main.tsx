@@ -4,7 +4,7 @@ import { RouterProvider } from "react-router-dom"
 import { MantineProvider } from "@mantine/core"
 
 import { theme } from "./theme"
-import { router } from "./App.tsx"
+import { router } from "./Routes.tsx"
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

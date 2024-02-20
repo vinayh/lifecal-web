@@ -1,6 +1,6 @@
 import { Fragment, ReactElement, useState } from "react"
 import { Navigate } from "react-router-dom"
-import { Group, Modal } from "@mantine/core"
+import { Box, Group, Modal } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
@@ -46,16 +46,16 @@ export function Calendar() {
     if (userProfile && userAuth && entries) {
         const allEntries = generateEntries(userProfile, entries)
         console.log(`Rendering calendar with ${allEntries.length} entries`)
-        return <>
-        <Modal opened={opened} onClose={() => { close(); setSelectedEntry(null); }} title="Entry">
-            {selectedEntry ? <EntryForm entryInfo={selectedEntry} /> : null}
-        </Modal>
+        return <Box maw={800} mx="auto">
+            <Modal opened={opened} onClose={() => { close(); setSelectedEntry(null); }} title="Entry">
+                {selectedEntry ? <EntryForm entryInfo={selectedEntry} /> : null}
+            </Modal>
             <Fragment>
                 <Group maw={1000} pl={10} gap="xs" align="right">
                     {allEntries.map(entry => renderCalEntry(entry))}
                 </Group >
             </Fragment>
-        </>
+        </Box>
     } else {
         console.log(userProfile, userAuth)
     }

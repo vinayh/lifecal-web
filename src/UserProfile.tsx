@@ -2,7 +2,7 @@ import { z } from "zod"
 import { useForm } from "@mantine/form"
 import { DateInput } from "@mantine/dates"
 import { notifications } from "@mantine/notifications"
-import { TextInput, Button, Group, Text, Paper, rem } from "@mantine/core"
+import { TextInput, Button, Group, rem, Box, Title } from "@mantine/core"
 
 import { ProfileFormData, useUserStore } from "./user"
 import { IconCheck, IconX } from "@tabler/icons-react"
@@ -62,40 +62,36 @@ export function UserProfile() {
         },
     })
 
-    return <>
-        <Paper radius="md" p="xl" shadow="lg" w={400}>
-            <Text size="lg" fw={500}>
-                Update profile
-            </Text>
-            <form onSubmit={form.onSubmit(onSubmitProfileUpdate)}>
-                <TextInput
-                    withAsterisk
-                    disabled
-                    label="Email"
-                    placeholder="your@email.com"
-                    {...form.getInputProps("email")} />
+    return <Box maw={500} mx="auto">
+        <Title order={2}>Update profile</Title>
+        <form onSubmit={form.onSubmit(onSubmitProfileUpdate)}>
+            <TextInput
+                withAsterisk
+                disabled
+                label="Email"
+                placeholder="your@email.com"
+                {...form.getInputProps("email")} />
 
-                <TextInput
-                    withAsterisk
-                    label="Name"
-                    {...form.getInputProps("name")} />
+            <TextInput
+                withAsterisk
+                label="Name"
+                {...form.getInputProps("name")} />
 
-                <DateInput
-                    withAsterisk
-                    label="Date of birth"
-                    placeholder="1 January 1984"
-                    {...form.getInputProps("birth")} />
+            <DateInput
+                withAsterisk
+                label="Date of birth"
+                placeholder="1 January 1984"
+                {...form.getInputProps("birth")} />
 
-                <TextInput
-                    withAsterisk
-                    label="Life expectancy (years)"
-                    placeholder="80"
-                    {...form.getInputProps("expYears")} />
+            <TextInput
+                withAsterisk
+                label="Life expectancy (years)"
+                placeholder="80"
+                {...form.getInputProps("expYears")} />
 
-                <Group justify="flex-end" mt="md">
-                    <Button type="submit" radius="md" w={110}>Submit</Button>
-                </Group>
-            </form>
-        </Paper>
-    </>
+            <Group justify="flex-end" mt="md">
+                <Button type="submit" radius="md" w={110}>Submit</Button>
+            </Group>
+        </form>
+    </Box>
 }
