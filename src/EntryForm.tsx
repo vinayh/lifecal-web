@@ -2,7 +2,7 @@ import { z } from "zod"
 import { Button, Group, Text, TextInput, rem } from "@mantine/core"
 import { IconCheck, IconX } from "@tabler/icons-react"
 import { notifications } from "@mantine/notifications"
-import { Entry, EntryFormData, useUserStore } from "./user"
+import { EntryFormData, useUserStore } from "./user"
 import { useForm } from "@mantine/form"
 import { DateInput } from "@mantine/dates"
 import { EntryInfo } from "./Calendar"
@@ -51,7 +51,7 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
         initialValues: {
             start: new Date(date),
             note: (entry && entry.note) ? entry.note : "",
-            tags: (entry && entry.tags) ? entry.tags : ""
+            tags: (entry && entry.tags) ? JSON.stringify(entry.tags) : ""
         },
         validate: {
             start: value => (value instanceof Date || z.string().datetime().safeParse(value).success) ? null : "Invalid start date",
