@@ -62,8 +62,8 @@ export function UserProfile() {
         },
     })
 
-    return <Box maw={500} mx="auto">
-        <Title order={2}>Update profile</Title>
+    return <Box maw={500} pt={50} mx="auto">
+        <Title order={2} mb={15}>Update profile</Title>
         <form onSubmit={form.onSubmit(onSubmitProfileUpdate)}>
             <TextInput
                 withAsterisk

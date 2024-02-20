@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { IconBrandGoogle, IconBrandGithub } from '@tabler/icons-react'
-import { useForm } from '@mantine/form'
+import { IconBrandGoogle, IconBrandGithub } from "@tabler/icons-react"
+import { useForm } from "@mantine/form"
 import {
     TextInput,
     PasswordInput,
@@ -14,7 +14,8 @@ import {
     Divider,
     Center,
     Stack,
-} from '@mantine/core';
+    Title,
+} from "@mantine/core"
 
 import { AuthStatus, useUserStore } from "./user"
 
@@ -32,55 +33,49 @@ export default function Login() {
     })
 
     return (
-        <Center pt={25}>
-            <Box>
-                <Paper radius="md" p="xl" shadow="lg">
-                    <Text size="lg" fw={500}>
-                        Welcome to LifeCal, login or register with
-                    </Text>
+            <Box maw={500} pt={50} mx="auto">
+                <Title order={2}>Login or register</Title>
 
-                    <Group grow mb="md" mt="md">
-                        <GoogleButton radius="md" onClick={() => login("google", undefined)}>Google</GoogleButton>
-                        <GithubButton radius="md" onClick={() => login("github", undefined)}>GitHub</GithubButton>
+                <Group grow mb="md" mt="md">
+                    <GoogleButton radius="md" onClick={() => login("google", undefined)}>Google</GoogleButton>
+                    <GithubButton radius="md" onClick={() => login("github", undefined)}>GitHub</GithubButton>
+                </Group>
+
+                <Divider label="Or continue with email" labelPosition="center" my="lg" />
+
+                <form onSubmit={form.onSubmit(values => login("emailPassword", values))}>
+                    <Stack>
+                        <TextInput
+                            required
+                            label="Email"
+                            placeholder="your@email.com"
+                            radius="md"
+                            {...form.getInputProps("email")}
+                        />
+
+                        <PasswordInput
+                            required
+                            label="Password"
+                            placeholder="Your password"
+                            radius="md"
+                            {...form.getInputProps("password")}
+                        />
+                    </Stack>
+
+                    <Group justify="flex-end" mt="md">
+                        <LoadingOverlay visible={authStatus === AuthStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+                        {/* TODO: Change logging in status from AuthStatus.SigningIn as that no longer works, try using something based on login fn */}
+                        <Button type="submit" radius="md">Login | Register</Button>
                     </Group>
-
-                    <Divider label="Or continue with email" labelPosition="center" my="lg" />
-
-                    <form onSubmit={form.onSubmit(values => login("emailPassword", values))}>
-                        <Stack>
-                            <TextInput
-                                required
-                                label="Email"
-                                placeholder="your@email.com"
-                                radius="md"
-                                {...form.getInputProps("email")}
-                            />
-
-                            <PasswordInput
-                                required
-                                label="Password"
-                                placeholder="Your password"
-                                radius="md"
-                                {...form.getInputProps("password")}
-                            />
-                        </Stack>
-
-                        <Group justify="flex-end" mt="md">
-                            <LoadingOverlay visible={authStatus === AuthStatus.SigningIn} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
-                            {/* TODO: Change logging in status from AuthStatus.SigningIn as that no longer works, try using something based on login fn */}
-                            <Button type="submit" radius="md">Login | Register</Button>
-                        </Group>
-                    </form>
-                </Paper>
+                </form>
             </Box>
-        </Center>
     )
 }
 
-function GoogleButton(props: ButtonProps & React.ComponentPropsWithoutRef<'button'>) {
+function GoogleButton(props: ButtonProps & React.ComponentPropsWithoutRef<"button">) {
     return <Button leftSection={<IconBrandGoogle />} {...props} />
 }
 
-function GithubButton(props: ButtonProps & React.ComponentPropsWithoutRef<'button'>) {
+function GithubButton(props: ButtonProps & React.ComponentPropsWithoutRef<"button">) {
     return <Button leftSection={<IconBrandGithub />} {...props} />
 }

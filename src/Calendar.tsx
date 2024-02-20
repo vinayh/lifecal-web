@@ -1,12 +1,12 @@
 import { Fragment, ReactElement, useState } from "react"
 import { Navigate } from "react-router-dom"
-import { Box, Group, Modal } from "@mantine/core"
+import { Box, Group, Modal, Title } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import { addWeeks, previousMonday, addYears, differenceInWeeks, isPast, isMonday } from "date-fns"
 
 import { UserProfile, Entry, useUserStore, ProfileStatus } from "./user"
-import "/public/styles/calendar.css"
 import { EntryForm } from "./EntryForm"
+import "/public/styles/calendar.css"
 
 export type EntryInfo = {
     date: string
@@ -40,23 +40,24 @@ export function Calendar() {
         return <div key={date} className={divClass} onClick={onClick}></div>
     }
 
-    if (profileStatus !== ProfileStatus.CompleteProfile) {
-        return <Navigate to="/profile" />
-    }
-    if (userProfile && userAuth && entries) {
+    if (userProfile && userAuth && entries && profileStatus === ProfileStatus.CompleteProfile) {
         const allEntries = generateEntries(userProfile, entries)
         console.log(`Rendering calendar with ${allEntries.length} entries`)
-        return <Box maw={800} mx="auto">
+        return <>
+            <Box maw={800} pt={50} mx="auto">
+                <Title order={2} mb={20}>Your life calendar</Title>
+                <Fragment>
+                    <Group maw={700} gap="xs" align="right">
+                        {allEntries.map(entry => renderCalEntry(entry))}
+                    </Group>
+                </Fragment>
+            </Box>
             <Modal opened={opened} onClose={() => { close(); setSelectedEntry(null); }} title="Entry">
                 {selectedEntry ? <EntryForm entryInfo={selectedEntry} /> : null}
             </Modal>
-            <Fragment>
-                <Group maw={1000} pl={10} gap="xs" align="right">
-                    {allEntries.map(entry => renderCalEntry(entry))}
-                </Group >
-            </Fragment>
-        </Box>
+        </>
     } else {
         console.log(userProfile, userAuth)
+        return <Navigate to="/profile" />
     }
 }

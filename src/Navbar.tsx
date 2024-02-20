@@ -1,11 +1,9 @@
-import { ReactNode } from 'react'
-import { Image } from "@mantine/core"
+import { ReactNode } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 import { IconHome2, IconUser, IconLogout, IconLogin, IconCalendar, IconInfoCircle, Icon } from "@tabler/icons-react"
 
 import { AuthStatus, useUserStore } from "./user"
 import classes from "/public/styles/navbar.module.css"
-import logo from "/public/logo.png"
 
 type NavbarItem = {
     link: string,
@@ -56,7 +54,6 @@ export const Navbar = () => {
     return (
         <nav className={classes.navbar}>
             <div className={classes.navbarMain}>
-                <Image src={logo} w="auto" h={50} mb={20} />
                 {data.map(renderItem)}
             </div>
 
