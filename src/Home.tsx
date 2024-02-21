@@ -1,4 +1,4 @@
-import { Box, Title } from "@mantine/core";
+import { Box, Title } from "@mantine/core"
 
 export const Home = () => (
     <Box maw={700} pt={50} mx="auto">

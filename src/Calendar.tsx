@@ -38,10 +38,12 @@ export function Calendar() {
         })
         const entryDatesArray = [...Array(numWeeks).keys()]
         const allEntries: EntryInfo[] = entryDatesArray.map(wk => {
-            const start = formatISO(addWeeks(startDate, wk), { representation: "date" })
+            const start = formatISO(addWeeks(startDate, wk), {
+                representation: "date",
+            })
             return {
                 date: start,
-                entry: start in entries ? entries[start] : null
+                entry: start in entries ? entries[start] : null,
             }
         })
         return allEntries
@@ -87,7 +89,7 @@ export function Calendar() {
                         close()
                         setSelectedEntry(null)
                     }}
-                    title="Entry"
+                    title="Add or edit entry"
                 >
                     {selectedEntry ? (
                         <EntryForm entryInfo={selectedEntry} />

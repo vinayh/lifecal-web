@@ -1,4 +1,12 @@
-import { Button, Group, TagsInput, Text, TextInput, rem } from "@mantine/core"
+import {
+    Button,
+    Group,
+    Kbd,
+    TagsInput,
+    Text,
+    TextInput,
+    rem,
+} from "@mantine/core"
 import { IconCheck, IconX } from "@tabler/icons-react"
 import { notifications } from "@mantine/notifications"
 import { useForm } from "@mantine/form"
@@ -70,8 +78,8 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
 
     return (
         <>
-            <Text size="lg" fw={500}>
-                Entry starting {date}
+            <Text size="md" mb={15}>
+                Date: {date}
             </Text>
             <form onSubmit={form.onSubmit(onSubmitEntryUpdate)}>
                 <DateInput
@@ -100,6 +108,9 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
                     placeholder="Select tags"
                     {...form.getInputProps("tags")}
                 />
+                <Text mt={10} size="xs">
+                    Press <Kbd>↵ Enter</Kbd> to select a tag
+                </Text>
 
                 <Group justify="flex-end" mt="md">
                     <Button type="submit" radius="md" w={110}>
