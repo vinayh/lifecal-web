@@ -12,6 +12,7 @@ import { UserProfile } from "./UserProfile"
 import { PublicLayout } from "./PublicLayout"
 import { PrivateLayout } from "./PrivateLayout"
 import { Layout } from "./Layout"
+import { NotFound404 } from "./NotFound404"
 
 export const router = createBrowserRouter(
     createRoutesFromElements(
@@ -25,6 +26,7 @@ export const router = createBrowserRouter(
                 <Route path="profile" element={<UserProfile />} />
                 <Route path="calendar" element={<Calendar />} />
             </Route>
+            <Route path="*" element={<NotFound404 />} />
         </Route>
     )
 )
