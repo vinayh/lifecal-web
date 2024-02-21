@@ -48,7 +48,7 @@ export const Navbar = () => {
 
     const logInOut =
         userAuth && authStatus !== AuthStatus.NoUser
-            ? { link: "/", label: "Log out", icon: IconLogout, onClick: logout }
+            ? { link: "#", label: "Log out", icon: IconLogout, onClick: logout }
             : {
                   link: "/login",
                   label: "Log in",

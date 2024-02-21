@@ -1,4 +1,3 @@
-import { z } from "zod"
 import { Button, Group, TagsInput, Text, TextInput, rem } from "@mantine/core"
 import { IconCheck, IconX } from "@tabler/icons-react"
 import { notifications } from "@mantine/notifications"

@@ -1,6 +1,6 @@
 import { Fragment, ReactElement, useState } from "react"
 import { Navigate } from "react-router-dom"
-import { Box, Container, Group, Modal, Title } from "@mantine/core"
+import { Box, Group, Modal, Title } from "@mantine/core"
 import { useDisclosure } from "@mantine/hooks"
 import {
     addWeeks,
@@ -28,7 +28,7 @@ export function Calendar() {
 
     const generateEntries = (
         user: UserProfile,
-        entries: Entry[]
+        entries: Record<string, Entry>
     ): EntryInfo[] => {
         const birth = new Date(user.birth)
         const startDate = isMonday(birth) ? birth : previousMonday(birth)
@@ -37,22 +37,12 @@ export function Calendar() {
             roundingMethod: "ceil",
         })
         const entryDatesArray = [...Array(numWeeks).keys()]
-        const entryDates = new Map(
-            entryDatesArray.map(wk => [
-                formatISO(addWeeks(startDate, wk), { representation: "date" }),
-                null,
-            ])
-        )
-        const entriesMap: Map<string, Entry | null> = entries.reduce(
-            (a, v) => ({
-                ...a,
-                [formatISO(v.start, { representation: "date" })]: v,
-            }),
-            entryDates
-        )
-        const allEntries: EntryInfo[] = []
-        entriesMap.forEach((entry, date) => {
-            allEntries.push({ date: date, entry: entry })
+        const allEntries: EntryInfo[] = entryDatesArray.map(wk => {
+            const start = formatISO(addWeeks(startDate, wk), { representation: "date" })
+            return {
+                date: start,
+                entry: start in entries ? entries[start] : null
+            }
         })
         return allEntries
     }

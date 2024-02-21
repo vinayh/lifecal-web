@@ -1,7 +1,14 @@
 import { z } from "zod"
 import { useEffect } from "react"
 import { useOutlet } from "react-router-dom"
-import { AppShell, Image, Box, Burger, LoadingOverlay, Group, Center } from "@mantine/core"
+import {
+    AppShell,
+    Image,
+    Burger,
+    LoadingOverlay,
+    Group,
+    Center,
+} from "@mantine/core"
 import { Notifications } from "@mantine/notifications"
 import { useDisclosure } from "@mantine/hooks"
 import "@mantine/notifications/styles.css"
@@ -10,7 +17,10 @@ import { auth, useUserStore } from "./user.ts"
 import { Navbar } from "./Navbar.tsx"
 import logo from "/public/logo.png"
 
-export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
+export const LoginFormEntryZ = z.object({
+    email: z.string().email(),
+    password: z.string(),
+})
 
 export const Layout = () => {
     const { loadingProfile, loadingAuth, setAuth } = useUserStore()
@@ -26,7 +36,10 @@ export const Layout = () => {
 
     const loader = (
         <Center>
-            <LoadingOverlay visible={loadingProfile || loadingAuth} overlayProps={{ radius: "sm", blur: 2 }} />
+            <LoadingOverlay
+                visible={loadingProfile || loadingAuth}
+                overlayProps={{ radius: "sm", blur: 2 }}
+            />
         </Center>
     )
 
@@ -63,7 +76,7 @@ export const Layout = () => {
 
             <AppShell.Main>
                 <Notifications position="top-right" />
-                {(loadingProfile || loadingAuth) ? loader : outlet}
+                {loadingProfile || loadingAuth ? loader : outlet}
             </AppShell.Main>
         </AppShell>
     )

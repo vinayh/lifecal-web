@@ -18,15 +18,15 @@ import { app } from "./firebase"
 
 interface UserState {
     userProfile: UserProfile | null
-    entries: Entry[] | null
+    entries: Record<string, Entry> | null
     tags: Tag[] | null
     profileLastUpdated: number | null
     userAuth: AuthUser | null
     profileStatus: ProfileStatus
     authStatus: AuthStatus
     setProfile: (profile: UserProfile | null) => void
-    setEntry: (entry: Entry) => void
-    setEntries: (entries: Entry[] | null) => void
+    // setEntry: (entry: Entry) => void
+    setEntries: (entries: Record<string, Entry> | null) => void
     setTags: (tags: Tag[] | null) => void
     loadingProfile: boolean
     loadingAuth: boolean
@@ -36,7 +36,7 @@ interface UserState {
     ) => Promise<FetchStatus>
     logout: () => void
     updateProfile: (formData: ProfileFormData) => Promise<FetchStatus>
-    updateContent: (entries: Entry[], tags: Tag[]) => Promise<FetchStatus>
+    // updateContent: (entries: Entry[], tags: Tag[]) => Promise<FetchStatus>
     addUpdateEntry: (formData: EntryFormData) => Promise<FetchStatus>
     setAuth: (auth: AuthUser | null) => void
     shouldUpdateProfile: (auth: AuthUser) => boolean
@@ -89,31 +89,32 @@ export const useUserStore = create<UserState>()(
                     }
                 }
             },
-            setEntry: newEntry => {
-                const entries = get().entries
-                if (!entries) {
-                    set(() => ({ entries: [newEntry] }))
-                    return
-                }
-                var replaceExisting = false
-                entries.forEach((entry, entryIdx) => {
-                    if (entry.start === newEntry.start) {
-                        entries[entryIdx] = newEntry
-                        replaceExisting = true
-                    }
-                })
-                if (!replaceExisting) {
-                    entries.push(newEntry)
-                }
-            },
+            // setEntry: newEntry => {
+            //     const entries = get().entries
+            //     if (!entries) {
+            //         set(() => ({ entries: [newEntry] }))
+            //         return
+            //     }
+            //     var replaceExisting = false
+            //     entries.forEach((entry, entryIdx) => {
+            //         if (entry.start === newEntry.start) {
+            //             entries[entryIdx] = newEntry
+            //             replaceExisting = true
+            //         }
+            //     })
+            //     if (!replaceExisting) {
+            //         entries.push(newEntry)
+            //     }
+            // },
             setEntries: entries => {
-                const result = z.array(EntryZ).safeParse(entries)
+                const result = z.record(ISODateZ, EntryZ).safeParse(entries)
                 if (result.success) {
                     set(() => ({ entries: result.data }))
                     console.log("Set entries to " + JSON.stringify(result.data))
                 } else {
-                    set(() => ({ entries: null }))
-                    console.log("Invalid entries, setting to null")
+                    // set(() => ({ entries: null }))
+                    // console.log("Invalid entries, setting to null")
+                    console.error("Invalid entries to update, not setting")
                 }
             },
             setTags: tags => {
@@ -221,33 +222,33 @@ export const useUserStore = create<UserState>()(
                     return Promise.reject(FetchStatus.Error)
                 }
             },
-            updateContent: async (entries, tags) => {
-                const userAuth = get().userAuth
-                if (
-                    !userAuth ||
-                    !get().userProfile ||
-                    get().authStatus !== AuthStatus.SignedIn
-                ) {
-                    throw new Error("Invalid user session for updating content")
-                }
-                return userAuth
-                    .getIdToken()
-                    .then(idToken =>
-                        fetch(
-                            `${BACKEND_URL}/updateContent?uid=${userAuth.uid}&idToken=${idToken}&entries=${entries}&tags=${tags}`
-                        )
-                    )
-                    .then(res => {
-                        if (!res.ok) {
-                            throw new Error(
-                                "Invalid server response for updating content"
-                            )
-                        }
-                        get().setEntries(entries)
-                        get().setTags(tags)
-                        return FetchStatus.Success
-                    })
-            },
+            // updateContent: async (entries, tags) => {
+            //     const userAuth = get().userAuth
+            //     if (
+            //         !userAuth ||
+            //         !get().userProfile ||
+            //         get().authStatus !== AuthStatus.SignedIn
+            //     ) {
+            //         throw new Error("Invalid user session for updating content")
+            //     }
+            //     return userAuth
+            //         .getIdToken()
+            //         .then(idToken =>
+            //             fetch(
+            //                 `${BACKEND_URL}/updateContent?uid=${userAuth.uid}&idToken=${idToken}&entries=${entries}&tags=${tags}`
+            //             )
+            //         )
+            //         .then(res => {
+            //             if (!res.ok) {
+            //                 throw new Error(
+            //                     "Invalid server response for updating content"
+            //                 )
+            //             }
+            //             get().setEntries(entries)
+            //             get().setTags(tags)
+            //             return FetchStatus.Success
+            //         })
+            // },
             addUpdateEntry: async formData => {
                 const userAuth = get().userAuth
                 if (
@@ -273,22 +274,20 @@ export const useUserStore = create<UserState>()(
                     return Promise.reject(FetchStatus.Error)
                 }
                 const { start, note, tags } = result.data
+
                 return userAuth
                     .getIdToken()
                     .then(idToken =>
                         fetch(
                             `${BACKEND_URL}/addUpdateEntry?uid=${
                                 userAuth.uid
-                            }&idToken=${idToken}&start=${start}&note=${note}&tags=${JSON.stringify(
-                                tags
+                            }&idToken=${idToken}&start=${start}&note=${note}&tags=${encodeURIComponent(
+                                JSON.stringify(tags)
                             )}`
                         )
                     )
                     .then(res => {
                         if (!res.ok) {
-                            console.error(
-                                "Invalid server response for updating entry"
-                            )
                             throw new Error(
                                 "Invalid server response for updating entry"
                             )
@@ -296,16 +295,17 @@ export const useUserStore = create<UserState>()(
                         return res.json()
                     })
                     .then(res => {
-                        const fetched = EntryZ.safeParse(res)
+                        const fetched = z
+                            .record(ISODateZ, EntryZ)
+                            .safeParse(res.entries)
+                        console.log(JSON.stringify(res.entries))
                         if (!fetched.success) {
-                            console.error(
-                                "Invalid new entry response from server"
-                            )
                             throw new Error(
-                                "Invalid new entry response from server"
+                                "Invalid new entry response from server: " +
+                                    fetched.error
                             )
                         }
-                        get().setEntry(fetched.data)
+                        get().setEntries(fetched.data)
                         console.log(
                             `Updated entry: ${JSON.stringify(fetched.data)}`
                         )
@@ -498,7 +498,6 @@ export type Tag = z.infer<typeof TagZ>
 export const ISODateZ = z.string().refine(i => /^\d{4}-\d{2}-\d{2}$/.test(i))
 
 export const EntryZ = z.object({
-    id: z.number(),
     created: z.string().datetime(),
     start: ISODateZ,
     note: z.string(),
