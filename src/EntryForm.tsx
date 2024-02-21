@@ -1,12 +1,13 @@
 import { z } from "zod"
-import { Button, Group, Text, TextInput, rem } from "@mantine/core"
+import { Button, Group, TagsInput, Text, TextInput, rem } from "@mantine/core"
 import { IconCheck, IconX } from "@tabler/icons-react"
 import { notifications } from "@mantine/notifications"
-import { EntryFormData, useUserStore } from "./user"
 import { useForm } from "@mantine/form"
 import { DateInput } from "@mantine/dates"
-import { EntryInfo } from "./Calendar"
 import "@mantine/dates/styles.css"
+
+import { EntryFormData, ISODateZ, useUserStore } from "./user"
+import { EntryInfo } from "./Calendar"
 
 export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
     const { addUpdateEntry } = useUserStore()
@@ -29,9 +30,13 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
                     color: "teal",
                     title: "Entry updated",
                     message: "Entry has been saved.",
-                    icon: <IconCheck style={{ width: rem(18), height: rem(18) }} />,
+                    icon: (
+                        <IconCheck
+                            style={{ width: rem(18), height: rem(18) }}
+                        />
+                    ),
                     loading: false,
-                    autoClose: 3000
+                    autoClose: 3000,
                 })
             })
             .catch(error => {
@@ -42,52 +47,67 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
                     message: "Error editing entry.",
                     icon: <IconX style={{ width: rem(18), height: rem(18) }} />,
                     loading: false,
-                    autoClose: 3000
+                    autoClose: 3000,
                 })
-                console.error("Profile update error: " + JSON.stringify(error))
+                console.error("Entry update error: " + JSON.stringify(error))
             })
     }
 
     const form = useForm({
         initialValues: {
             start: new Date(date),
-            note: (entry && entry.note) ? entry.note : "",
-            tags: (entry && entry.tags) ? JSON.stringify(entry.tags) : ""
+            note: entry && entry.note ? entry.note : "",
+            tags: entry && entry.tags ? entry.tags : [],
         },
         validate: {
-            start: value => (value instanceof Date || z.string().datetime().safeParse(value).success) ? null : "Invalid start date",
-            note: value => value ? null : "Invalid note",
-            tags: value => (value !== undefined && value.length >= 1) ? null : "Invalid tags",
+            start: value =>
+                value instanceof Date || ISODateZ.safeParse(value).success
+                    ? null
+                    : "Invalid start date",
+            note: value => (value ? null : "Invalid note"),
+            // tags: value => (value !== undefined && value.length >= 1) ? null : "Invalid tags",
         },
     })
 
-    return <>
-        <Text size="lg" fw={500}>
-            Entry starting {date}
-        </Text>
-        <form onSubmit={form.onSubmit(onSubmitEntryUpdate)}>
-            <DateInput
-                withAsterisk
-                label="Start date"
-                placeholder="1 January 1984"
-                {...form.getInputProps("start")} />
+    return (
+        <>
+            <Text size="lg" fw={500}>
+                Entry starting {date}
+            </Text>
+            <form onSubmit={form.onSubmit(onSubmitEntryUpdate)}>
+                <DateInput
+                    withAsterisk
+                    label="Start date"
+                    placeholder="1 January 1984"
+                    {...form.getInputProps("start")}
+                />
 
-            <TextInput
-                withAsterisk
-                label="Note"
-                placeholder=""
-                {...form.getInputProps("note")} />
+                <TextInput
+                    withAsterisk
+                    label="Note"
+                    placeholder=""
+                    {...form.getInputProps("note")}
+                />
 
-            <TextInput
+                {/* <TextInput
                 withAsterisk
                 label="Tags"
                 placeholder=""
-                {...form.getInputProps("tags")} />
-            {/* TODO: Change tags entry to select list of available tags or add new tag */}
+                {...form.getInputProps("tags")} /> */}
+                {/* TODO: Change tags entry to select list of available tags or add new tag */}
 
-            <Group justify="flex-end" mt="md">
-                <Button type="submit" radius="md" w={110}>Submit</Button>
-            </Group>
-        </form>
-    </>
+                <TagsInput
+                    label="Tags"
+                    placeholder="Select tags"
+                    {...form.getInputProps("tags")}
+                />
+
+                <Group justify="flex-end" mt="md">
+                    <Button type="submit" radius="md" w={110}>
+                        Submit
+                    </Button>
+                </Group>
+            </form>
+        </>
+    )
 }

@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { useEffect } from "react"
 import { useOutlet } from "react-router-dom"
-import { AppShell, Image, Box, Burger, LoadingOverlay } from "@mantine/core"
+import { AppShell, Image, Box, Burger, LoadingOverlay, Group, Center } from "@mantine/core"
 import { Notifications } from "@mantine/notifications"
 import { useDisclosure } from "@mantine/hooks"
 import "@mantine/notifications/styles.css"
@@ -12,7 +12,7 @@ import logo from "/public/logo.png"
 
 export const LoginFormEntryZ = z.object({ email: z.string().email(), password: z.string() })
 
-export const UserLayout = () => {
+export const Layout = () => {
     const { loadingProfile, loadingAuth, setAuth } = useUserStore()
     const [opened, { toggle }] = useDisclosure(false)
     const outlet = useOutlet()
@@ -25,37 +25,39 @@ export const UserLayout = () => {
     }, [])
 
     const loader = (
-        <Box maw={100} mx="auto">
-            <LoadingOverlay visible={loadingProfile || loadingAuth} zIndex={0} overlayProps={{ radius: "sm", blur: 2 }} />
-        </Box>
+        <Center>
+            <LoadingOverlay visible={loadingProfile || loadingAuth} overlayProps={{ radius: "sm", blur: 2 }} />
+        </Center>
     )
 
     return (
         <AppShell
             header={{ height: 70 }}
             navbar={{
-                width: 300,
+                width: 250,
                 breakpoint: "sm",
                 collapsed: { mobile: !opened },
             }}
             padding="xs"
         >
-            <AppShell.Header>
-        <Burger
-          opened={opened}
-          onClick={toggle}
-          hiddenFrom="sm"
-          size="sm"
-        />
-        <Image src={logo} w="auto" h={50} m={10}/>
-      </AppShell.Header>
+            <AppShell.Header withBorder={false}>
+                <Group>
+                    <Burger
+                        opened={opened}
+                        onClick={toggle}
+                        hiddenFrom="sm"
+                        size="sm"
+                    />
+                    <Image src={logo} w="auto" h={50} m={10} />
+                </Group>
+            </AppShell.Header>
             <Burger
                 opened={opened}
                 onClick={toggle}
                 hiddenFrom="sm"
                 size="sm"
             />
-            <AppShell.Navbar p="md">
+            <AppShell.Navbar p="md" withBorder={false}>
                 <Navbar />
             </AppShell.Navbar>
 
