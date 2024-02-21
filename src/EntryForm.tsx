@@ -16,7 +16,7 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
         form.validate()
         const id = notifications.show({
             loading: true,
-            title: "Updating profile",
+            title: "Updating entry",
             message: "Please wait...",
             autoClose: false,
             withCloseButton: false,

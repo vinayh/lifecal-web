@@ -113,7 +113,6 @@ export const useUserStore = create<UserState>()(
                     console.log("Set entries to " + JSON.stringify(result.data))
                 } else {
                     // set(() => ({ entries: null }))
-                    // console.log("Invalid entries, setting to null")
                     console.error("Invalid entries to update, not setting")
                 }
             },
@@ -340,7 +339,7 @@ export const useUserStore = create<UserState>()(
                     auth.getIdToken(true)
                         .then(idToken =>
                             fetch(
-                                `${BACKEND_URL}/getUser?uid=${auth.uid}&idToken=${idToken}`
+                                `${BACKEND_URL}/getUserAndEntries?uid=${auth.uid}&idToken=${idToken}`
                             )
                         )
                         .then(res => {
