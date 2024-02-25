@@ -151,7 +151,7 @@ export const useUserStore = create<UserState>()(
                         await signInWithPopup(
                             auth,
                             new GoogleAuthProvider().addScope(
-                                "https://www.googleapis.com/auth/userinfo.profile"
+                                "https://www.googleapis.com/auth/userinfo.email"
                             )
                         )
                     } else {
