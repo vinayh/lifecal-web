@@ -11,6 +11,7 @@ import {
     GithubAuthProvider,
     GoogleAuthProvider,
     signOut,
+    browserPopupRedirectResolver,
 } from "firebase/auth"
 import { formatISO } from "date-fns"
 
@@ -131,29 +132,33 @@ export const useUserStore = create<UserState>()(
                         console.log(
                             `Signing in with ${data.email}, ${data.password}`
                         )
-                        await signInWithEmailAndPassword(
-                            auth,
-                            data.email,
-                            data.password
-                        ).catch(_ =>
-                            createUserWithEmailAndPassword(
+                        try {
+                            await signInWithEmailAndPassword(
                                 auth,
                                 data.email,
                                 data.password
                             )
-                        )
-                    } else if (authMethod === "github") {
-                        await signInWithPopup(
-                            auth,
-                            new GithubAuthProvider().addScope("read:user")
-                        )
-                    } else if (authMethod === "google") {
-                        await signInWithPopup(
-                            auth,
-                            new GoogleAuthProvider().addScope(
-                                "https://www.googleapis.com/auth/userinfo.email"
+                        } catch {
+                            await createUserWithEmailAndPassword(
+                                auth,
+                                data.email,
+                                data.password
                             )
-                        )
+                        }
+                    // } else if (authMethod === "github") {
+                    //     await signInWithPopup(
+                    //         auth,
+                    //         new GithubAuthProvider().addScope("read:user")
+                    //         // browserPopupRedirectResolver
+                    //     )
+                    // } else if (authMethod === "google") {
+                    //     await signInWithPopup(
+                    //         auth,
+                    //         new GoogleAuthProvider().addScope(
+                    //             "https://www.googleapis.com/auth/userinfo.email"
+                    //         )
+                    //         // browserPopupRedirectResolver
+                    //     )
                     } else {
                         console.error("Invalid auth method specified")
                         return Promise.reject(FetchStatus.Error)

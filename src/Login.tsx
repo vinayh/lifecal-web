@@ -46,8 +46,8 @@ export const Login = () => {
 
     return (
         <Box maw={700} pt={50} mx="auto">
-            <Title order={2}>Login or register</Title>
-            <Group grow mb="md" mt="md">
+            <Title order={2} mb={20}>Login or register</Title>
+            {/* <Group grow mb="md" mt="md">
                 <GoogleButton
                     radius="md"
                     onClick={() => login("google", undefined)}
@@ -66,7 +66,7 @@ export const Login = () => {
                 label="Or continue with email"
                 labelPosition="center"
                 my="lg"
-            />
+            /> */}
 
             <form onSubmit={form.onSubmit(onSubmitEmailPasswordLogin)}>
                 <Stack>
