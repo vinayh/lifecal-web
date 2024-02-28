@@ -14,7 +14,7 @@ import {
 
 import { UserProfile, Entry, useUserStore, ProfileStatus } from "./user"
 import { EntryForm } from "./EntryForm"
-import "/public/styles/calendar.css"
+import "/styles/calendar.css"
 
 export type EntryInfo = {
     date: string

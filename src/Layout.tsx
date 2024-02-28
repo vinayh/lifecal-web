@@ -15,7 +15,7 @@ import "@mantine/notifications/styles.css"
 
 import { auth, useUserStore } from "./user.ts"
 import { Navbar } from "./Navbar.tsx"
-import logo from "/public/logo.png"
+import logo from "/assets/logo.png"
 
 export const LoginFormEntryZ = z.object({
     email: z.string().email(),

@@ -11,7 +11,7 @@ import {
 } from "@tabler/icons-react"
 
 import { AuthStatus, useUserStore } from "./user"
-import classes from "/public/styles/navbar.module.css"
+import classes from "/styles/navbar.module.css"
 
 type NavbarItem = {
     link: string
