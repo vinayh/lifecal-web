@@ -1,18 +1,9 @@
-import {
-    Button,
-    Group,
-    Kbd,
-    TagsInput,
-    Text,
-    TextInput,
-    rem,
-} from "@mantine/core"
-import { IconCheck, IconX } from "@tabler/icons-react"
-import { notifications } from "@mantine/notifications"
-import { useForm } from "@mantine/form"
+import { Button, Group, Kbd, TagsInput, Text, TextInput } from "@mantine/core"
 import { DateInput } from "@mantine/dates"
+import { useForm } from "@mantine/form"
 import "@mantine/dates/styles.css"
 
+import { newLoading, updateError, updateSuccess } from "./notifications"
 import { EntryFormData, ISODateZ, useUserStore } from "./user"
 import { EntryInfo } from "./Calendar"
 
@@ -22,40 +13,14 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
 
     const onSubmitEntryUpdate = (formEntry: EntryFormData) => {
         form.validate()
-        const id = notifications.show({
-            loading: true,
-            title: "Updating entry",
-            message: "Please wait...",
-            autoClose: false,
-            withCloseButton: false,
-        })
+        const id = newLoading("Updating entry", "Please wait...")
         addUpdateEntry(formEntry)
             .then(() => {
                 console.log("Success received")
-                notifications.update({
-                    id,
-                    color: "teal",
-                    title: "Entry updated",
-                    message: "Entry has been saved.",
-                    icon: (
-                        <IconCheck
-                            style={{ width: rem(18), height: rem(18) }}
-                        />
-                    ),
-                    loading: false,
-                    autoClose: 3000,
-                })
+                updateSuccess(id, "Entry updated", "Entry has been saved.")
             })
             .catch(error => {
-                notifications.update({
-                    id,
-                    color: "red",
-                    title: "Error",
-                    message: "Error editing entry.",
-                    icon: <IconX style={{ width: rem(18), height: rem(18) }} />,
-                    loading: false,
-                    autoClose: 3000,
-                })
+                updateError(id, "Error", "Error editing entry.")
                 console.error("Entry update error: " + JSON.stringify(error))
             })
     }

@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { useState } from "react"
-import { IconBrandGoogle, IconBrandGithub } from "@tabler/icons-react"
+// import { IconBrandGoogle, IconBrandGithub } from "@tabler/icons-react"
 import { useForm } from "@mantine/form"
 import {
     TextInput,
@@ -9,8 +9,7 @@ import {
     Button,
     Box,
     LoadingOverlay,
-    ButtonProps,
-    Divider,
+    // ButtonProps,
     Stack,
     Title,
 } from "@mantine/core"
@@ -103,14 +102,14 @@ export const Login = () => {
     )
 }
 
-function GoogleButton(
-    props: ButtonProps & React.ComponentPropsWithoutRef<"button">
-) {
-    return <Button leftSection={<IconBrandGoogle />} {...props} />
-}
+// function GoogleButton(
+//     props: ButtonProps & React.ComponentPropsWithoutRef<"button">
+// ) {
+//     return <Button leftSection={<IconBrandGoogle />} {...props} />
+// }
 
-function GithubButton(
-    props: ButtonProps & React.ComponentPropsWithoutRef<"button">
-) {
-    return <Button leftSection={<IconBrandGithub />} {...props} />
-}
+// function GithubButton(
+//     props: ButtonProps & React.ComponentPropsWithoutRef<"button">
+// ) {
+//     return <Button leftSection={<IconBrandGithub />} {...props} />
+// }

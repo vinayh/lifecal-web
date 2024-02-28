@@ -7,11 +7,11 @@ import {
     User as AuthUser,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
-    signInWithPopup,
-    GithubAuthProvider,
-    GoogleAuthProvider,
     signOut,
-    browserPopupRedirectResolver,
+    // signInWithPopup,
+    // GithubAuthProvider,
+    // GoogleAuthProvider,
+    // browserPopupRedirectResolver,
 } from "firebase/auth"
 import { formatISO } from "date-fns"
 
