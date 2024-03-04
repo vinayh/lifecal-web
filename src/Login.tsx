@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { useState } from "react"
-// import { IconBrandGoogle, IconBrandGithub } from "@tabler/icons-react"
+import { IconBrandGoogle, IconBrandGithub } from "@tabler/icons-react"
 import { useForm } from "@mantine/form"
 import {
     TextInput,
@@ -8,9 +8,10 @@ import {
     Group,
     Button,
     Box,
-    // ButtonProps,
+    ButtonProps,
     Stack,
     Title,
+    Divider,
 } from "@mantine/core"
 
 import { useUserStore } from "./user"
@@ -19,7 +20,7 @@ import TextLoader from "./TextLoader"
 export const Login = () => {
     const { login } = useUserStore()
     const [loggingIn, setLoggingIn] = useState(false)
-    // const valEmailRegex = (email: string): boolean => { return (/^\S+@\S+$/.test(email)) }
+    // const valEmailRegex = (email:    string): boolean => { return (/^\S+@\S+$/.test(email)) }
     const valEmailZod = (email: string): boolean => {
         return z.string().email().safeParse(email).success
     }
@@ -48,7 +49,7 @@ export const Login = () => {
             <Title order={2} mb={20}>
                 Login or register
             </Title>
-            {/* <Group grow mb="md" mt="md">
+            <Group grow mb="md" mt="md">
                 <GoogleButton
                     radius="md"
                     onClick={() => login("google", undefined)}
@@ -67,7 +68,7 @@ export const Login = () => {
                 label="Or continue with email"
                 labelPosition="center"
                 my="lg"
-            /> */}
+            />
 
             <form onSubmit={form.onSubmit(onSubmitEmailPasswordLogin)}>
                 <Stack>
@@ -105,14 +106,14 @@ export const Login = () => {
     )
 }
 
-// function GoogleButton(
-//     props: ButtonProps & React.ComponentPropsWithoutRef<"button">
-// ) {
-//     return <Button leftSection={<IconBrandGoogle />} {...props} />
-// }
+function GoogleButton(
+    props: ButtonProps & React.ComponentPropsWithoutRef<"button">
+) {
+    return <Button leftSection={<IconBrandGoogle />} {...props} />
+}
 
-// function GithubButton(
-//     props: ButtonProps & React.ComponentPropsWithoutRef<"button">
-// ) {
-//     return <Button leftSection={<IconBrandGithub />} {...props} />
-// }
+function GithubButton(
+    props: ButtonProps & React.ComponentPropsWithoutRef<"button">
+) {
+    return <Button leftSection={<IconBrandGithub />} {...props} />
+}

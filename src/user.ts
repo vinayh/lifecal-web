@@ -8,9 +8,9 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signOut,
-    // signInWithPopup,
-    // GithubAuthProvider,
-    // GoogleAuthProvider,
+    signInWithPopup,
+    GithubAuthProvider,
+    GoogleAuthProvider,
     // browserPopupRedirectResolver,
 } from "firebase/auth"
 import { formatISO } from "date-fns"
@@ -145,20 +145,20 @@ export const useUserStore = create<UserState>()(
                                 data.password
                             )
                         }
-                    // } else if (authMethod === "github") {
-                    //     await signInWithPopup(
-                    //         auth,
-                    //         new GithubAuthProvider().addScope("read:user")
-                    //         // browserPopupRedirectResolver
-                    //     )
-                    // } else if (authMethod === "google") {
-                    //     await signInWithPopup(
-                    //         auth,
-                    //         new GoogleAuthProvider().addScope(
-                    //             "https://www.googleapis.com/auth/userinfo.email"
-                    //         )
-                    //         // browserPopupRedirectResolver
-                    //     )
+                    } else if (authMethod === "github") {
+                        await signInWithPopup(
+                            auth,
+                            new GithubAuthProvider().addScope("read:user")
+                            // browserPopupRedirectResolver
+                        )
+                    } else if (authMethod === "google") {
+                        await signInWithPopup(
+                            auth,
+                            new GoogleAuthProvider().addScope(
+                                "https://www.googleapis.com/auth/userinfo.email"
+                            )
+                            // browserPopupRedirectResolver
+                        )
                     } else {
                         console.error("Invalid auth method specified")
                         return Promise.reject(FetchStatus.Error)
