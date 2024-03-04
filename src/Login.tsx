@@ -8,13 +8,13 @@ import {
     Group,
     Button,
     Box,
-    LoadingOverlay,
     // ButtonProps,
     Stack,
     Title,
 } from "@mantine/core"
 
 import { useUserStore } from "./user"
+import TextLoader from "./TextLoader"
 
 export const Login = () => {
     const { login } = useUserStore()
@@ -45,7 +45,9 @@ export const Login = () => {
 
     return (
         <Box maw={700} pt={50} mx="auto">
-            <Title order={2} mb={20}>Login or register</Title>
+            <Title order={2} mb={20}>
+                Login or register
+            </Title>
             {/* <Group grow mb="md" mt="md">
                 <GoogleButton
                     radius="md"
@@ -87,11 +89,12 @@ export const Login = () => {
                 </Stack>
 
                 <Group justify="flex-end" mt="md">
-                    <LoadingOverlay
+                    <TextLoader
+                        text="Logging in..."
                         visible={loggingIn}
-                        zIndex={1000}
                         overlayProps={{ radius: "sm", blur: 2 }}
                     />
+
                     {/* TODO: Change logging in status from AuthStatus.SigningIn as that no longer works, try using something based on login fn */}
                     <Button type="submit" radius="md">
                         Login | Register
