@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app"
 
 export const firebaseConfig = {
     apiKey: "AIzaSyA-bK7ElDp76XhjTjkpzApULPLV8ZjQna4",
-    authDomain: "lifecal-backend.firebaseapp.com",
+    authDomain: "lifecal.web.app",
     projectId: "lifecal-backend",
     storageBucket: "lifecal-backend.appspot.com",
     messagingSenderId: "531017479197",
