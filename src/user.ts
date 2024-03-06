@@ -11,7 +11,7 @@ import {
     signInWithPopup,
     GithubAuthProvider,
     GoogleAuthProvider,
-    // browserPopupRedirectResolver,
+    browserPopupRedirectResolver,
 } from "firebase/auth"
 import { formatISO } from "date-fns"
 
@@ -149,8 +149,8 @@ export const useUserStore = create<UserState>()(
                     } else if (authMethod === "github") {
                         await signInWithPopup(
                             auth,
-                            new GithubAuthProvider().addScope("read:user")
-                            // browserPopupRedirectResolver
+                            new GithubAuthProvider().addScope("read:user"),
+                            browserPopupRedirectResolver
                         )
                     } else if (authMethod === "google") {
                         await signInWithPopup(
