@@ -39,6 +39,7 @@ interface UserState {
     updateProfile: (formData: ProfileFormData) => Promise<FetchStatus>
     // updateContent: (entries: Entry[], tags: Tag[]) => Promise<FetchStatus>
     addUpdateEntry: (formData: EntryFormData) => Promise<FetchStatus>
+    deleteEntry: (start: string) => Promise<FetchStatus>
     setAuth: (auth: AuthUser | null) => void
     shouldUpdateProfile: (auth: AuthUser) => boolean
     isLoading: () => boolean
@@ -265,9 +266,7 @@ export const useUserStore = create<UserState>()(
                     )
                 }
                 const result = NewEntryZ.safeParse({
-                    start: formatISO(formData.start, {
-                        representation: "date",
-                    }),
+                    start: formData.start,
                     note: formData.note,
                     tags: formData.tags,
                 })
@@ -319,6 +318,54 @@ export const useUserStore = create<UserState>()(
                         console.error(
                             "Error while adding/updating entry: " +
                                 error.message
+                        )
+                        return Promise.reject(FetchStatus.Error)
+                    })
+            },
+            deleteEntry: async start => {
+                const userAuth = get().userAuth
+                if (
+                    !userAuth ||
+                    !get().userProfile ||
+                    get().authStatus !== AuthStatus.SignedIn
+                ) {
+                    throw new Error(
+                        "Invalid user session for adding/updating entry"
+                    )
+                }
+                const result = ISODateZ.safeParse(start)
+                if (!result.success) {
+                    console.error("Invalid start date for deletion: " + start)
+                    return Promise.reject(FetchStatus.Error)
+                }
+                return userAuth
+                    .getIdToken()
+                    .then(idToken =>
+                        fetch(
+                            `${BACKEND_URL}/deleteEntry?uid=${userAuth.uid}&idToken=${idToken}&start=${result.data}`
+                        )
+                    )
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error("Server error when deleting entry")
+                        }
+                        return res.json()
+                    })
+                    .then(res => {
+                        const start = ISODateZ.parse(res.start)
+                        const entries = get().entries
+                        if (!entries) {
+                            console.error("No valid entries to update")
+                            return Promise.reject(FetchStatus.Error)
+                        }
+                        delete entries[start]
+                        get().setEntries(entries)
+                        console.log(`Deleted entry with start date: ${start}`)
+                        return Promise.resolve(FetchStatus.Success)
+                    })
+                    .catch(error => {
+                        console.error(
+                            `Error while deleting entry with start ${start}: ${error.message}`
                         )
                         return Promise.reject(FetchStatus.Error)
                     })
@@ -534,7 +581,7 @@ export type ProfileFormData = {
 }
 
 export type EntryFormData = {
-    start: Date
+    start: string
     note: string
     tags: string[]
 }

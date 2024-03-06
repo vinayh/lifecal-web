@@ -7,7 +7,6 @@ import {
     Text,
 } from "@mantine/core"
 
-// type TextLoaderProps = Omit<LoaderProps, "children"> & { text: string }
 type TextLoadingOverlayProps = Omit<LoadingOverlayProps, "loaderProps"> & {
     text: string
 }

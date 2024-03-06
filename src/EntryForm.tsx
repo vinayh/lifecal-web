@@ -1,22 +1,24 @@
 import { Button, Group, Kbd, TagsInput, Text, TextInput } from "@mantine/core"
-import { DateInput } from "@mantine/dates"
 import { useForm } from "@mantine/form"
 import "@mantine/dates/styles.css"
 
 import { newLoading, updateError, updateSuccess } from "./notifications"
-import { EntryFormData, ISODateZ, useUserStore } from "./user"
+import { useUserStore } from "./user"
 import { EntryInfo } from "./Calendar"
 
 export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
-    const { addUpdateEntry } = useUserStore()
+    const { addUpdateEntry, deleteEntry } = useUserStore()
     const { date, entry } = entryInfo
 
-    const onSubmitEntryUpdate = (formEntry: EntryFormData) => {
+    const onSubmitEntryUpdate = (formEntry: {
+        note: string
+        tags: string[]
+    }) => {
         form.validate()
+        const updateEntry = { ...formEntry, start: date }
         const id = newLoading("Updating entry", "Please wait...")
-        addUpdateEntry(formEntry)
+        addUpdateEntry(updateEntry)
             .then(() => {
-                console.log("Success received")
                 updateSuccess(id, "Entry updated", "Entry has been saved.")
             })
             .catch(error => {
@@ -25,17 +27,29 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
             })
     }
 
+    const onDeleteEntry = () => {
+        const id = newLoading("Deleting entry", "Please wait...")
+        deleteEntry(date)
+            .then(() => {
+                updateSuccess(id, "Entry deleted", "Entry has been deleted.")
+            })
+            .catch(error => {
+                updateError(id, "Error", "Error deleting entry.")
+                console.error("Entry delete error: " + JSON.stringify(error))
+            })
+    }
+
     const form = useForm({
         initialValues: {
-            start: new Date(date),
+            // start: date,
             note: entry && entry.note ? entry.note : "",
             tags: entry && entry.tags ? entry.tags : [],
         },
         validate: {
-            start: value =>
-                value instanceof Date || ISODateZ.safeParse(value).success
-                    ? null
-                    : "Invalid start date",
+            // start: value =>
+            //     value instanceof Date || ISODateZ.safeParse(value).success
+            //         ? null
+            //         : "Invalid start date",
             note: value => (value ? null : "Invalid note"),
             // tags: value => (value !== undefined && value.length >= 1) ? null : "Invalid tags",
         },
@@ -47,27 +61,18 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
                 Date: {date}
             </Text>
             <form onSubmit={form.onSubmit(onSubmitEntryUpdate)}>
-                <DateInput
+                {/* <DateInput
                     withAsterisk
                     label="Start date"
                     placeholder="1 January 1984"
                     {...form.getInputProps("start")}
-                />
-
+                /> */}
                 <TextInput
                     withAsterisk
                     label="Note"
                     placeholder=""
                     {...form.getInputProps("note")}
                 />
-
-                {/* <TextInput
-                withAsterisk
-                label="Tags"
-                placeholder=""
-                {...form.getInputProps("tags")} /> */}
-                {/* TODO: Change tags entry to select list of available tags or add new tag */}
-
                 <TagsInput
                     label="Tags"
                     placeholder="Select tags"
@@ -77,10 +82,21 @@ export const EntryForm = ({ entryInfo }: { entryInfo: EntryInfo }) => {
                     Press <Kbd>↵ Enter</Kbd> to select a tag
                 </Text>
 
-                <Group justify="flex-end" mt="md">
-                    <Button type="submit" radius="md" w={110}>
+                <Group justify="space-between" mt="md">
+                    <Button type="submit" size="md" radius="md" w={110}>
                         Submit
                     </Button>
+                    {entry ? (
+                        <Button
+                            radius="md"
+                            size="xs"
+                            variant="filled"
+                            color="red"
+                            onClick={() => onDeleteEntry()}
+                        >
+                            Delete
+                        </Button>
+                    ) : null}
                 </Group>
             </form>
         </>
