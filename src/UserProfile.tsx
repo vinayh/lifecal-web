@@ -72,6 +72,12 @@ export function UserProfile() {
             <Title order={2} mb={15}>
                 Update profile
             </Title>
+            {!userProfile || !userProfile.birth || !userProfile.expYears ? (
+                <p>
+                    Welcome! Please set your profile here to view your life
+                    calendar.
+                </p>
+            ) : null}
             <form onSubmit={form.onSubmit(onSubmitProfileUpdate)}>
                 <TextInput
                     withAsterisk
